@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- Launch file for running the delta-arm only !-->
+<launch>
+  <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
+  <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
+  <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+</launch>
