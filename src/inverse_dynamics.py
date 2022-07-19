@@ -4,6 +4,10 @@ import numpy as np
 from geometry_msgs.msg import TwistStamped, PoseStamped
 from delta_2.msg import ServoAngles6DoFStamped
 from tf.transformations import euler_from_quaternion
+from message_filters import ApproximateTimeSynchronizer, Subscriber
+
+#code to determine servo velocities from end effector velocity setpoints
+#todo: there is a singularity when the platform is level (phi and theta are aligned), maybe quaternions can fix this?
 
 class InverseDynamics:
     def __init__(self):
@@ -40,83 +44,98 @@ class InverseDynamics:
             [-sb, -rb, 0],
             [sb, -rb, 0]])
 
-        #initialise empty numpy arrays
-        self.p_w = np.zeros((6,3))
-        self.L_w = np.zeros((6,3))
-        self.Theta = np.zeros(6)
-        self.n = np.zeros((6,3))
-        self.J1_inv = np.zeros((6,6))
-        self.J2_inv = np.asarray([[np.eye(3),np.zeros((3,3))],[np.zeros((6,3))]]) 
-        self.Theta_dot = np.zeros(6)
+        #initialise Jacobean
+        self.J2_inv = np.identity(6)
 
         #init publisher and subscriber
         self.pub_servo_velocities = rospy.Publisher('/' + robot_name + '/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
-        self.sub_platform_vel = rospy.Subscriber('/' + robot_name + '/platform_setpoint/twist', TwistStamped, self.vel_callback) #target twist subscriber
-        self.sub_platform_pose = rospy.Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped, self.pose_callback) #target pose subscriber
+        sub_platform_vel = Subscriber('/' + robot_name + '/platform_setpoint/twist', TwistStamped) #target twist subscriber
+        sub_platform_pose = Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped) #target pose subscriber
+        sub_servo_angles = Subscriber('/' + robot_name + '/servo_setpoint/positions', ServoAngles6DoFStamped) #servo angle subscriber
 
-    def pose_callback(self, platform_pose): 
-        #assign positions to vector X
-        self.X = np.asarray([platform_pose.pose.position.x, platform_pose.pose.position.y, platform_pose.pose.position.z])
+        ts = ApproximateTimeSynchronizer([sub_platform_vel, sub_platform_pose, sub_servo_angles], queue_size=1, slop=0.05)
+        ts.registerCallback(self.vel_callback)
 
-        #assign rotations to rotation matrix wRp (from platfom to world coordinates)
-        (phi, psi, theta) = euler_from_quaternion([platform_pose.pose.orientation.x, platform_pose.pose.orientation.y, platform_pose.pose.orientation.z, platform_pose.pose.orientation.w])
+    def vel_callback(self, platform_vel, platform_pose, servo_angles):
+        #initialise empty numpy arrays
+        p_w = np.zeros((6,3))
+        L_w = np.zeros((6,3))
+        n = np.zeros((6,3))
+        p = np.zeros((6,3))
+        J1_inv = np.zeros((6,6))
+        Theta_dot = np.zeros(6)
+        M = np.zeros(6)
+        N = np.zeros(6)
 
-        self.cphi = np.cos(phi)
-        self.sphi = np.sin(phi)
-        self.cpsi = np.cos(psi)
-        self.spsi = np.sin(psi)
-        self.ctheta = np.cos(theta)
-        self.stheta = np.sin(theta)
+        #put calculated servo angles in array
+        Theta = np.asarray([np.deg2rad(servo_angles.Theta1), 
+                                np.deg2rad(servo_angles.Theta2),
+                                np.deg2rad(servo_angles.Theta3), 
+                                np.deg2rad(servo_angles.Theta4), 
+                                np.deg2rad(servo_angles.Theta5), 
+                                np.deg2rad(servo_angles.Theta6)])
 
-        Rpsi = np.asarray([[self.cpsi, -self.spsi, 0],
-                            [self.spsi, self.cpsi, 0],
+        #convert quaternion to Euler angles
+        (psi, theta, phi) = euler_from_quaternion([platform_pose.pose.orientation.x, platform_pose.pose.orientation.y, platform_pose.pose.orientation.z, platform_pose.pose.orientation.w])
+
+        #Q is the target state vector (x,y,z,phi,psi,theta)
+        Q = np.asarray([platform_pose.pose.position.x, platform_pose.pose.position.y, platform_pose.pose.position.z, phi, psi, theta])
+        
+        #assign rotations to rotation matrix wRp (from platform to world coordinates)
+        cphi = np.cos(phi)
+        sphi = np.sin(phi)
+        cpsi = np.cos(psi)
+        spsi = np.sin(psi)
+        ctheta = np.cos(theta)
+        stheta = np.sin(theta)
+
+        Rpsi = np.asarray([[cpsi, -spsi, 0],
+                            [spsi, cpsi, 0],
                             [0, 0, 1]])
     
         Rtheta = np.asarray([[1, 0, 0],
-                            [0, self.ctheta, -self.stheta],
-                            [0, self.stheta, self.ctheta]])
+                            [0, ctheta, -stheta],
+                            [0, stheta, ctheta]])
       
-        Rphi = np.asarray([[self.cphi, 0, self.sphi],
+        Rphi = np.asarray([[cphi, 0, sphi],
                             [0, 1, 0],
-                            [-self.sphi, 0, self.cphi]])
+                            [-sphi, 0, cphi]])
 
-        self.wRp = np.matmul(np.matmul(Rpsi, Rtheta), Rphi)
+        wRp = np.matmul(np.matmul(Rpsi, Rtheta), Rphi)
+
+        #angular velocities
+        omega = np.asarray([[0, cpsi, spsi * stheta],
+                [0, spsi, -cpsi * stheta],
+                [1, 0, ctheta]])
+        
+        #determine J2_inv
+        self.J2_inv[3:6, 3:6] = omega
    
-    def vel_callback(self, platform_vel): #callback calculates servo velocities
         #assign velocities to vector q_dot
-        q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
+        Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
                             platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
         
-        omega = np.asarray([[0, self.cpsi, self.spsi * self.stheta],
-                [0, self.spsi, -self.cpsi * self.stheta],
-                [1, 0, self.ctheta]])
-        
-        self.J2_inv[[3:5],[3:5]] = omega
-        
         for i in range(6):
-            #calculate distances from platform and base joints
-            self.p_w[i,:] = self.X + np.matmul(self.wRp, self.p_p[i,:])
-            self.L_w[i,:] = self.p_w[i,:] - self.b_w[i,:]
-            rl = np.linalg.norm(self.L_w[i,:])
-            L = rl**2 - (self.rs**2 - self.ra**2)
+            #the following 4 lines are repeated from inverse kinematics to obtain useful intermediate variables
+            p_w[i,:] = Q[0:3] + np.matmul(wRp, self.p_p[i,:])
+            L_w[i,:] = p_w[i,:] - self.b_w[i,:]
+            M[i] = 2 * self.ra * p_w[i,2]
+            N[i] = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[i,0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[i,1] - self.b_w[i,1]))
 
-            #convert distances to servo angles
-            M[i] = 2 * self.ra * self.p_w[i,2]
-            N[i] = 2 * self.ra * (np.cos(self.beta[i]) * (self.p_w[i,0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (self.p_w[i,1] - self.b_w[i,1]))
-            Theta = np.arcsin(L / np.sqrt(M[i]**2 + N**2)) - np.arctan(N[i] / M[i])
+            #this is the new stuff to calculate velocities
+            n[i,:] = L_w[i,:] / np.linalg.norm(L_w[i,:])
+            w = np.cross(self.p_p[i,:], n[i,:])
+            p[i,:] = np.matmul(wRp, w)
+        
+        J1_inv = np.column_stack((n, p))
+        L_w_dot = np.matmul(np.matmul(J1_inv, self.J2_inv), Q_dot)
 
-            n = self.L_w[i,:] / np.linalg.norm(self.L_w[i,:])
-            self.J1_inv[:,i] = np.asarray([n,[np.matmul(self.wRp, np.cross(self.p_p[i,:], n[i,:]))]])
-
-        L_w_dot = np.matmul(np.matmul(self.J1_inv, self.J2_inv), q_dot)
-
-        for i in range(6):
-            Theta_dot[i] = L_w_dot[i] / (M[i] * np.cos(Theta[i]) - N[i] * np.sin(Theta[i]))
+        Theta_dot = L_w_dot / (M * np.cos(Theta) - N * np.sin(Theta))
 
         #publish
         servo_velocities = ServoAngles6DoFStamped()
-        servo_velocities.header.frame_id = "base"
-        servo_velocities.header.stamp = rospy.Time.now()
+        servo_velocities.header.frame_id = "servo"
+        servo_velocities.header.stamp = platform_pose.header.stamp
         servo_velocities.Theta1 = np.rad2deg(Theta_dot[0])
         servo_velocities.Theta2 = np.rad2deg(Theta_dot[1])
         servo_velocities.Theta3 = np.rad2deg(Theta_dot[2])
@@ -124,8 +143,6 @@ class InverseDynamics:
         servo_velocities.Theta5 = np.rad2deg(Theta_dot[4])
         servo_velocities.Theta6 = np.rad2deg(Theta_dot[5])
         self.pub_servo_velocities.publish(servo_velocities)
-
- 
 
 if __name__ == '__main__': #initialise node and run loop
     rospy.init_node('inverse_dynamics')

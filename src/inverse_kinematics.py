@@ -5,8 +5,11 @@ from geometry_msgs.msg import PoseStamped
 from delta_2.msg import ServoAngles6DoFStamped
 from tf.transformations import euler_from_quaternion
 
+#code to determine servo positions from end effector pose setpoints
+#todo: platform rotations are defined sequentially which leads to weird stuff, maybe quaternions can fix this?
 class InverseKinematics:
     def __init__(self):
+        #todo: work out how to define robot name outside of script
         robot_name = "delta_2"
 
         #get geometry values form parameter server
@@ -41,8 +44,8 @@ class InverseKinematics:
             [sb, -rb, 0]])
 
         #init publisher and subscriber
-        self.pub_servo_angles = rospy.Publisher('/' + robot_name + '/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1) #servo angle publisher
-        self.sub_platform_state = rospy.Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped, self.callback) #target pose subscriber
+        self.pub_servo_angles = rospy.Publisher('/' + robot_name + '/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
+        self.sub_platform_state = rospy.Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
         
     def callback(self, platform_state): #callback calculates servo angles
         #assign positions to vector X
@@ -51,7 +54,7 @@ class InverseKinematics:
                         platform_state.pose.position.z])
 
         #get Euler angles from quaternion
-        (phi, psi, theta) = euler_from_quaternion([platform_state.pose.orientation.x, 
+        (psi, theta, phi) = euler_from_quaternion([platform_state.pose.orientation.x, 
                                                     platform_state.pose.orientation.y, 
                                                     platform_state.pose.orientation.z, 
                                                     platform_state.pose.orientation.w])
@@ -95,17 +98,17 @@ class InverseKinematics:
             N = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[i,0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[i,1] - self.b_w[i,1]))
             disc = L / np.sqrt(M**2 + N**2)
 
-            #check solution exists
+            #check solution exists -> disc must be in domain of arcsin(), [-1,1]
             if (disc >= 1.0) or (disc <= -1.0):
                 Theta[i] = np.nan
             else:
                 Theta[i] = np.arcsin(disc) - np.arctan(N / M)
 
         #publish if all servo angles have been solved
-        if not np.any(np.isnan(self.Theta)):
+        if not np.any(np.isnan(Theta)):
             servo_angles = ServoAngles6DoFStamped()
-            servo_angles.header.frame_id = "base"
-            servo_angles.header.stamp = rospy.Time.now()
+            servo_angles.header.frame_id = "servo"
+            servo_angles.header.stamp = platform_state.header.stamp
             servo_angles.Theta1 = np.rad2deg(Theta[0])
             servo_angles.Theta2 = np.rad2deg(Theta[1])
             servo_angles.Theta3 = np.rad2deg(Theta[2])

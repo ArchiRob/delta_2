@@ -4,4 +4,5 @@
   <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
   <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
   <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+  <node name="InverseDynamics" pkg="delta_2" type="inverse_dynamics.py" required="true" output="screen"/>
 </launch>
