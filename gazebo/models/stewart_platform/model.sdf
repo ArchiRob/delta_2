@@ -1,0 +1,561 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+<model name="stewart_platform">
+  <link name="base_link">
+    <pose>0 0 0.05 0 0 0</pose>
+    <inertial>
+      <mass>10.0</mass>
+      <inertia>
+        <ixx>1.0</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>1.0</iyy> 
+        <iyz>0.0</iyz>
+        <izz>1.0</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.1</length>
+        </cylinder> 
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <cylinder>
+          <radius>0.05</radius>
+          <length>0.1</length>
+        </cylinder> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_1">
+    <pose>0.2 -0.05 0.1 0 0 0</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name="visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_2">
+    <pose>0.2 0.05 0.1 0 0 0</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_3">
+    <pose>-0.2 0.05 0.1 0 0 3.14159</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_4">
+    <pose>-0.2 -0.05 0.1 0 0 3.14159</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_5">
+    <pose>-0.05 -0.2 0.1 0 0 -1.57079</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="proximal_link_6">
+    <pose>0.05 -0.2 0.1 0 0 -1.57079</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.2 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_1">
+    <pose>0.3 -0.05 0.3  0 -1.57079 0</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_2">
+    <pose>0.3 0.05 0.3  0 -1.57079 0</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_3">
+    <pose>-0.3 0.05 0.3  0 -1.57079 3.14159</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_4">
+    <pose>-0.3 -0.05 0.3  0 -1.57079 3.14159</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_5">
+    <pose>-0.05 -0.3 0.3  0 -1.57079 -1.57079</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="distal_link_6">
+    <pose>0.05 -0.3 0.3  0 -1.57079 -1.57079</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="platform_link">
+    <pose>0 0 0.5  0 0 0</pose>
+    <inertial>
+      <mass>0.18</mass>
+      <inertia>
+        <ixx>0.0002835</ixx>
+        <ixy>0.0</ixy>
+        <ixz>0.0</ixz>
+        <iyy>0.0002835</iyy> 
+        <iyz>0.0</iyz>
+        <izz>0.000324</izz>
+      </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius>0.25</radius>
+          <length>0.01</length>
+        </cylinder>  
+      </geometry>
+    </collision>
+    <visual name = "visual">
+      <geometry>
+        <cylinder>
+          <radius>0.3</radius>
+          <length>0.01</length>
+        </cylinder> 
+      </geometry>
+    </visual>
+  </link>
+
+  <plugin name="joint_controller" filename="libjoint_controller.so"/>
+
+	<joint name="proximal_link_1_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_1</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_2_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_2</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+	<joint name="proximal_link_3_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_3</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_4_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_4</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+	<joint name="proximal_link_5_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_5</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>1 0 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="proximal_link_6_joint" type="revolute">
+		<parent>base_link</parent>
+		<child>proximal_link_6</child>
+		<pose>-0.1 0 0 0 0 0</pose>
+		<axis>
+			<xyz>1 0 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_1_joint" type="universal">
+		<parent>proximal_link_1</parent>
+		<child>distal_link_1</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_2_joint" type="universal">
+		<parent>proximal_link_2</parent>
+		<child>distal_link_2</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_3_joint" type="universal">
+		<parent>proximal_link_3</parent>
+		<child>distal_link_3</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_4_joint" type="universal">
+		<parent>proximal_link_4</parent>
+		<child>distal_link_4</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>0 1 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_5_joint" type="universal">
+		<parent>proximal_link_5</parent>
+		<child>distal_link_5</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>1 0 0</xyz>
+		</axis>
+	</joint>
+
+  <joint name="distal_link_6_joint" type="universal">
+		<parent>proximal_link_6</parent>
+		<child>distal_link_6</child>
+		<pose>-0.2 0 0 0 0 0</pose>
+		<axis>
+			<xyz>1 0 0</xyz>
+		</axis>
+	</joint>
+
+
+  <joint name="platform_link_1_joint" type="ball">
+		<parent>distal_link_1</parent>
+		<child>platform_link</child>
+		<pose>0.3 -0.05 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_2_joint" type="ball">
+		<parent>platform_link</parent>
+		<child>distal_link_2</child>
+		<pose>0.3 0.05 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_3_joint" type="ball">
+		<parent>platform_link</parent>
+		<child>distal_link_3</child>
+		<pose>-0.3 0.05 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_4_joint" type="ball">
+		<parent>platform_link</parent>
+		<child>distal_link_4</child>
+		<pose>-0.3 -0.05 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_5_joint" type="ball">
+		<parent>platform_link</parent>
+		<child>distal_link_5</child>
+		<pose>-0.05 -0.3 0 0 0 0</pose>
+	</joint>
+
+  <joint name="platform_link_6_joint" type="ball">
+		<parent>platform_link</parent>
+		<child>distal_link_6</child>
+		<pose>0.05 -0.3 0 0 0 0</pose>
+	</joint>
+</model>
+</sdf>
