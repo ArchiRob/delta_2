@@ -521,7 +521,6 @@
 		</axis>
 	</joint>
 
-
   <joint name="platform_link_1_joint" type="ball">
 		<parent>distal_link_1</parent>
 		<child>platform_link</child>
@@ -529,32 +528,32 @@
 	</joint>
 
   <joint name="platform_link_2_joint" type="ball">
-		<parent>platform_link</parent>
-		<child>distal_link_2</child>
+		<parent>distal_link_2</parent>
+		<child>platform_link</child>
 		<pose>0.3 0.05 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_3_joint" type="ball">
-		<parent>platform_link</parent>
-		<child>distal_link_3</child>
+		<parent>distal_link_3</parent>
+		<child>platform_link</child>
 		<pose>-0.3 0.05 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_4_joint" type="ball">
-		<parent>platform_link</parent>
-		<child>distal_link_4</child>
+		<parent>distal_link_4</parent>
+		<child>platform_link</child>
 		<pose>-0.3 -0.05 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_5_joint" type="ball">
-		<parent>platform_link</parent>
-		<child>distal_link_5</child>
+		<parent>distal_link_5</parent>
+		<child>platform_link</child>
 		<pose>-0.05 -0.3 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_6_joint" type="ball">
-		<parent>platform_link</parent>
-		<child>distal_link_6</child>
+		<parent>distal_link_6</parent>
+		<child>platform_link</child>
 		<pose>0.05 -0.3 0 0 0 0</pose>
 	</joint>
 </model>
