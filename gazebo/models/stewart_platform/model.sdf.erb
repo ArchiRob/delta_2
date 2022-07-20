@@ -1,15 +1,132 @@
 <?xml version="1.0"?>
 <sdf version="1.4">
 <model name="stewart_platform">
-	
+<%
+	RB = 0.5    #base radius
+  RP = 0.2    #platform radius
+  SB = 0.1   #base joint offset
+  SP = 0.1   #platform joint offset
+  PL = 0.5    #proximal link length
+  DL = 1.0    #distal link length
+  BH = 0.01    #base height
+  PH = 0.01    #platform height
+
+  BETA_1 = 0.523599
+  BETA_2 = 0.523599
+  BETA_3 = 2.61799
+  BETA_4 = 2.61799
+  BETA_5 = 4.71239
+  BETA_6 = 4.71239
+
+  PROXIMAL_LINK_MIDPOINT_OFFSET = -0.5 * PL
+	DISTAL_LINK_MIDPOINT_OFFSET = -0.5 * DL
+
+  C30 = Math.cos(0.523599)
+  S30 = Math.sin(0.523599)
+
+	BASE_JOINT_1_POSE_X = RB * C30 + SB * S30
+  BASE_JOINT_1_POSE_Y = RB * S30 - SB * C30
+  BASE_JOINT_2_POSE_X = RB * C30 - SB * S30
+  BASE_JOINT_2_POSE_Y = RB * S30 + SB * C30
+  BASE_JOINT_3_POSE_X = -RB * C30 + SB * S30
+  BASE_JOINT_3_POSE_Y = RB * S30 + SB * C30
+  BASE_JOINT_4_POSE_X = -RB * C30 - SB * S30
+  BASE_JOINT_4_POSE_Y = RB * S30 - SB * C30
+  BASE_JOINT_5_POSE_X = -SB
+  BASE_JOINT_5_POSE_Y = -RB
+  BASE_JOINT_6_POSE_X = SB
+  BASE_JOINT_6_POSE_Y = -RB
+
+  PLATFORM_JOINT_1_POSE_X = RP * C30 + SP * S30
+  PLATFORM_JOINT_1_POSE_Y = RP * S30 - SP * C30
+  PLATFORM_JOINT_2_POSE_X = RP * C30 - SP * S30
+  PLATFORM_JOINT_2_POSE_Y = RP * S30 + SP * C30
+  PLATFORM_JOINT_3_POSE_X = -RP * C30 + SP * S30
+  PLATFORM_JOINT_3_POSE_Y = RP * S30 + SP * C30
+  PLATFORM_JOINT_4_POSE_X = -RP * C30 - SP * S30
+  PLATFORM_JOINT_4_POSE_Y = RP * S30 - SP * C30
+  PLATFORM_JOINT_5_POSE_X = -SP
+  PLATFORM_JOINT_5_POSE_Y = -RP
+  PLATFORM_JOINT_6_POSE_X = SP
+  PLATFORM_JOINT_6_POSE_Y = -RP
+
+  PROXIMAL_LINK_1_POSE_X = BASE_JOINT_1_POSE_X + 0.5 * PL * C30
+  PROXIMAL_LINK_1_POSE_Y = BASE_JOINT_1_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_2_POSE_X = BASE_JOINT_2_POSE_X + 0.5 * PL * C30
+  PROXIMAL_LINK_2_POSE_Y = BASE_JOINT_2_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_3_POSE_X = BASE_JOINT_3_POSE_X - 0.5 * PL * C30
+  PROXIMAL_LINK_3_POSE_Y = BASE_JOINT_3_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_4_POSE_X = BASE_JOINT_4_POSE_X - 0.5 * PL * C30
+  PROXIMAL_LINK_4_POSE_Y = BASE_JOINT_4_POSE_Y + 0.5 * PL * S30
+  PROXIMAL_LINK_5_POSE_X = BASE_JOINT_5_POSE_X 
+  PROXIMAL_LINK_5_POSE_Y = BASE_JOINT_5_POSE_Y - 0.5 * PL
+  PROXIMAL_LINK_6_POSE_X = BASE_JOINT_6_POSE_X
+  PROXIMAL_LINK_6_POSE_Y = BASE_JOINT_6_POSE_Y - 0.5 * PL
+
+  DISTAL_JOINT_1_POSE_X = BASE_JOINT_1_POSE_X + PL * C30
+  DISTAL_JOINT_1_POSE_Y = BASE_JOINT_1_POSE_Y + PL * S30
+  DISTAL_JOINT_2_POSE_X = BASE_JOINT_2_POSE_X + PL * C30
+  DISTAL_JOINT_2_POSE_Y = BASE_JOINT_2_POSE_Y + PL * S30
+  DISTAL_JOINT_3_POSE_X = BASE_JOINT_3_POSE_X - PL * C30
+  DISTAL_JOINT_3_POSE_Y = BASE_JOINT_3_POSE_Y + PL * S30
+  DISTAL_JOINT_4_POSE_X = BASE_JOINT_4_POSE_X - PL * C30
+  DISTAL_JOINT_4_POSE_Y = BASE_JOINT_4_POSE_Y + PL * S30
+  DISTAL_JOINT_5_POSE_X = BASE_JOINT_5_POSE_X 
+  DISTAL_JOINT_5_POSE_Y = BASE_JOINT_5_POSE_Y - PL
+  DISTAL_JOINT_6_POSE_X = BASE_JOINT_6_POSE_X
+  DISTAL_JOINT_6_POSE_Y = BASE_JOINT_6_POSE_Y - PL
+
+  PLATFORM_LINK_POSE_Z = Math.sqrt(DL**2 - (SP - SB)**2 - (RB + PL - RP)**2) + BH + PH
+
+  L_X1 = PLATFORM_JOINT_1_POSE_X - DISTAL_JOINT_1_POSE_X
+  L_Y1 = PLATFORM_JOINT_1_POSE_Y - DISTAL_JOINT_1_POSE_Y
+  L_Z1 = BH + PLATFORM_LINK_POSE_Z
+  L_X2 = PLATFORM_JOINT_2_POSE_X - DISTAL_JOINT_2_POSE_X
+  L_Y2 = PLATFORM_JOINT_2_POSE_Y - DISTAL_JOINT_2_POSE_Y
+  L_Z2 = BH + PLATFORM_LINK_POSE_Z
+  L_X3 = PLATFORM_JOINT_3_POSE_X - DISTAL_JOINT_3_POSE_X
+  L_Y3 = PLATFORM_JOINT_3_POSE_Y - DISTAL_JOINT_3_POSE_Y
+  L_Z3 = BH + PLATFORM_LINK_POSE_Z
+  L_X4 = PLATFORM_JOINT_4_POSE_X - DISTAL_JOINT_4_POSE_X
+  L_Y4 = PLATFORM_JOINT_4_POSE_Y - DISTAL_JOINT_4_POSE_Y
+  L_Z4 = BH + PLATFORM_LINK_POSE_Z
+  L_X5 = PLATFORM_JOINT_5_POSE_X - DISTAL_JOINT_5_POSE_X
+  L_Y5 = PLATFORM_JOINT_5_POSE_Y - DISTAL_JOINT_5_POSE_Y
+  L_Z5 = BH + PLATFORM_LINK_POSE_Z
+  L_X6 = PLATFORM_JOINT_6_POSE_X - DISTAL_JOINT_6_POSE_X
+  L_Y6 = PLATFORM_JOINT_6_POSE_Y - DISTAL_JOINT_6_POSE_Y
+  L_Z6 = BH + PLATFORM_LINK_POSE_Z
+
+  DISTAL_LINK_1_POSE_X = DISTAL_JOINT_1_POSE_X + 0.5 * L_X1
+  DISTAL_LINK_1_POSE_Y = DISTAL_JOINT_1_POSE_Y + 0.5 * L_Y1
+  DISTAL_LINK_1_POSE_Z = 0.5 * L_Z1 + BH
+  DISTAL_LINK_2_POSE_X = DISTAL_JOINT_2_POSE_X + 0.5 * L_X2
+  DISTAL_LINK_2_POSE_Y = DISTAL_JOINT_2_POSE_Y + 0.5 * L_Y2
+  DISTAL_LINK_2_POSE_Z = 0.5 * L_Z2 + BH
+  DISTAL_LINK_3_POSE_X = DISTAL_JOINT_3_POSE_X + 0.5 * L_X3
+  DISTAL_LINK_3_POSE_Y = DISTAL_JOINT_3_POSE_Y + 0.5 * L_Y3
+  DISTAL_LINK_3_POSE_Z = 0.5 * L_Z3 + BH
+  DISTAL_LINK_4_POSE_X = DISTAL_JOINT_4_POSE_X + 0.5 * L_X4
+  DISTAL_LINK_4_POSE_Y = DISTAL_JOINT_4_POSE_Y + 0.5 * L_Y4
+  DISTAL_LINK_4_POSE_Z = 0.5 * L_Z4 + BH
+  DISTAL_LINK_5_POSE_X = DISTAL_JOINT_5_POSE_X + 0.5 * L_X5
+  DISTAL_LINK_5_POSE_Y = DISTAL_JOINT_5_POSE_Y + 0.5 * L_Y5
+  DISTAL_LINK_5_POSE_Z = 0.5 * L_Z5 + BH
+  DISTAL_LINK_6_POSE_X = DISTAL_JOINT_6_POSE_X + 0.5 * L_X6
+  DISTAL_LINK_6_POSE_Y = DISTAL_JOINT_6_POSE_Y + 0.5 * L_Y6
+  DISTAL_LINK_6_POSE_Z = 0.5 * L_Z6 + BH
+
+  DISTAL_ROTATION = Math.asin((PLATFORM_LINK_POSE_Z) / (RB + PL))
+
+%>	
   <plugin name="joint_controller" filename="libjoint_controller.so"/>
   
   <joint name="proximal_link_1_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_1</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>0.5000001943375613 -0.8660252915835662 0</xyz>
+			<xyz><%= S30 %> <%= -C30 %> 0</xyz>
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
@@ -21,9 +138,9 @@
   <joint name="proximal_link_2_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_2</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>0.5000001943375613 -0.8660252915835662 0</xyz>
+			<xyz><%= S30 %> <%= -C30 %> 0</xyz>
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
@@ -35,9 +152,9 @@
 	<joint name="proximal_link_3_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_3</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>0.5000001943375613 0.8660252915835662 0</xyz>
+			<xyz><%= S30 %> <%= C30 %> 0</xyz>
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
@@ -49,9 +166,9 @@
   <joint name="proximal_link_4_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_4</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>0.5000001943375613 0.8660252915835662 0</xyz>
+			<xyz><%= S30 %> <%= C30 %> 0</xyz>
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
@@ -63,7 +180,7 @@
 	<joint name="proximal_link_5_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_5</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>-1 0 0</xyz>
       <limit>
@@ -77,7 +194,7 @@
   <joint name="proximal_link_6_joint" type="revolute">
 		<parent>base_link</parent>
 		<child>proximal_link_6</child>
-		<pose>-0.25 0 0 0 0 0</pose>
+		<pose><%= PROXIMAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>-1 0 0</xyz>
       <limit>
@@ -91,43 +208,43 @@
   <joint name="distal_link_1_joint" type="revolute2">
 		<parent>proximal_link_1</parent>
 		<child>distal_link_1</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>-0.5000001943375613 0.8660252915835662 0</xyz>
+			<xyz><%= -S30 %> <%= C30 %> 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_2_joint" type="revolute2">
 		<parent>proximal_link_2</parent>
 		<child>distal_link_2</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>-0.5000001943375613 0.8660252915835662 0</xyz>
+			<xyz><%= -S30 %> <%= C30 %> 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_3_joint" type="revolute2">
 		<parent>proximal_link_3</parent>
 		<child>distal_link_3</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>-0.5000001943375613 -0.8660252915835662 0</xyz>
+			<xyz><%= -S30 %> <%= -C30 %> 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_4_joint" type="revolute2">
 		<parent>proximal_link_4</parent>
 		<child>distal_link_4</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz>-0.5000001943375613 -0.8660252915835662 0</xyz>
+			<xyz><%= -S30 %> <%= -C30 %> 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_5_joint" type="revolute2">
 		<parent>proximal_link_5</parent>
 		<child>distal_link_5</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
 		</axis>
@@ -136,7 +253,7 @@
   <joint name="distal_link_6_joint" type="revolute2">
 		<parent>proximal_link_6</parent>
 		<child>distal_link_6</child>
-		<pose>0.5 0 0 0 0 0</pose>
+		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
 		</axis>
@@ -145,41 +262,41 @@
   <joint name="platform_link_1_joint" type="ball">
 		<parent>distal_link_1</parent>
 		<child>platform_link</child>
-		<pose>0.22320507775046938 0.013397509709155625 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_1_POSE_X %> <%= PLATFORM_JOINT_1_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_2_joint" type="ball">
 		<parent>distal_link_2</parent>
 		<child>platform_link</child>
-		<pose>0.12320503888295714 0.1866025680258689 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_2_POSE_X %> <%= PLATFORM_JOINT_2_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_3_joint" type="ball">
 		<parent>distal_link_3</parent>
 		<child>platform_link</child>
-		<pose>-0.12320503888295714 0.1866025680258689 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_3_POSE_X %> <%= PLATFORM_JOINT_3_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_4_joint" type="ball">
 		<parent>distal_link_4</parent>
 		<child>platform_link</child>
-		<pose>-0.22320507775046938 0.013397509709155625 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_4_POSE_X %> <%= PLATFORM_JOINT_4_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_5_joint" type="ball">
 		<parent>distal_link_5</parent>
 		<child>platform_link</child>
-		<pose>-0.1 -0.2 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_5_POSE_X %> <%= PLATFORM_JOINT_5_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <joint name="platform_link_6_joint" type="ball">
 		<parent>distal_link_6</parent>
 		<child>platform_link</child>
-		<pose>0.1 -0.2 0 0 0 0</pose>
+		<pose><%= PLATFORM_JOINT_6_POSE_X %> <%= PLATFORM_JOINT_6_POSE_Y %> 0 0 0 0</pose>
 	</joint>
 
   <link name="base_link">
-    <pose>0 0 0.005 0 0 0</pose>
+    <pose>0 0 <%= 0.5*BH %> 0 0 0</pose>
     <inertial>
       <mass>10.0</mass>
       <inertia>
@@ -194,23 +311,23 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius>0.5</radius>
-          <length>0.01</length>
+          <radius><%=RB %></radius>
+          <length><%= BH %></length>
         </cylinder> 
       </geometry>
     </collision>
     <visual name="visual">
       <geometry>
         <cylinder>
-          <radius>0.5</radius>
-          <length>0.01</length>
+          <radius><%= RB %></radius>
+          <length><%= BH %></length>
         </cylinder> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_1">
-    <pose>0.6995189881214308 0.28839761659481433 0.01 0 0 0.523599</pose>
+    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> <%= BH %> 0 0 <%= BETA_1 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -225,21 +342,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name="visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_2">
-    <pose>0.5995189492539186 0.4616026749115276 0.01 0 0 0.523599</pose>
+    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> <%= BH %> 0 0 <%= BETA_2 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -254,21 +371,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_3">
-    <pose>-0.5995189492539186 0.4616026749115276 0.01 0 0 2.61799</pose>
+    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> <%= BH %> 0 0 <%= BETA_3 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -283,21 +400,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_4">
-    <pose>-0.6995189881214308 0.28839761659481433 0.01 0 0 2.61799</pose>
+    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> <%= BH %> 0 0 <%= BETA_4 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -312,21 +429,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_5">
-    <pose>-0.1 -0.75 0.01 0 0 4.71239</pose>
+    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> <%= BH %> 0 0 <%= BETA_5 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -341,21 +458,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_6">
-    <pose>0.1 -0.75 0.01 0 0 4.71239</pose>
+    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> <%= BH %> 0 0 <%= BETA_6 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -370,21 +487,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>0.5 0.01 0.01</size>
+          <size><%= PL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_1">
-    <pose>0.5696151943838959 0.21339758744418014 0.32499999999999996 0 0.6687427032023716 0.523599</pose>
+    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z %> 0 <%= DISTAL_ROTATION %> <%= BETA_1 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -399,21 +516,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_2">
-    <pose>0.46961515551638355 0.3866026457608934 0.32499999999999996  0 0.6687427032023716 0.523599</pose>
+    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_2 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -428,21 +545,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_3">
-    <pose>-0.46961515551638355 0.3866026457608934 0.32499999999999996  0 0.6687427032023716 2.61799</pose>
+    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_3 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -457,21 +574,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_4">
-    <pose>-0.5696151943838959 0.21339758744418014 0.32499999999999996  0 0.6687427032023716 2.61799</pose>
+    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_4 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -486,21 +603,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_5">
-    <pose>-0.1 -0.6 0.32499999999999996  0 0.6687427032023716 4.71239</pose>
+    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_5 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -515,21 +632,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_6">
-    <pose>0.1 -0.6 0.32499999999999996  0 0.6687427032023716 4.71239</pose>
+    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_6 %></pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -544,21 +661,21 @@
     <collision name="collision">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size>1.0 0.01 0.01</size>
+          <size><%= DL %> 0.01 0.01</size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="platform_link">
-    <pose>0 0 0.6199999999999999 0 0 0</pose>
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z %> 0 0 0</pose>
     <inertial>
       <mass>0.18</mass>
       <inertia>
@@ -573,16 +690,16 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius>0.2</radius>
-          <length>0.01</length>
+          <radius><%= RP %></radius>
+          <length><%= PH %></length>
         </cylinder>  
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <cylinder>
-          <radius>0.2</radius>
-          <length>0.01</length>
+          <radius><%= RP %></radius>
+          <length><%= PH %></length>
         </cylinder> 
       </geometry>
     </visual>
