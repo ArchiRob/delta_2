@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name='iris_stewart'>
+    <include>
+      <uri>model://iris</uri>
+    </include>
+    <include>
+      <uri>model://stewart_platform</uri>
+      <pose>0.3 0 0 -1.5708 0 0</pose>
+    </include>
+    <joint name="platform_joint" type="fixed">
+      <child>stewart_platform::base_link</child>
+      <parent>iris::base_link</parent>
+    </joint>
+  </model>
+</sdf>
