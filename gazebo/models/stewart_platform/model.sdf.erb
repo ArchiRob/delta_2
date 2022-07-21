@@ -2,14 +2,38 @@
 <sdf version="1.4">
 <model name="stewart_platform">
 <%
-	RB = 0.5    #base radius
-  RP = 0.2    #platform radius
-  SB = 0.1   #base joint offset
-  SP = 0.1   #platform joint offset
-  PL = 0.5    #proximal link length
-  DL = 1.0    #distal link length
+	RB = 0.15    #base radius
+  RP = 0.05    #platform radius
+  SB = 0.04   #base joint offset
+  SP = 0.04   #platform joint offset
+  PL = 0.2    #proximal link length
+  DL = 0.35    #distal link length
   BH = 0.01    #base height
   PH = 0.01    #platform height
+
+  P_DIA = 0.02  #proximal diameter
+  D_DIA = 0.01  #distal diameter
+
+  P_M = 0.05 #proximal mass
+  D_M = 0.02 #distal mass
+  B_M = 10 #base mass
+  PL_M = 0.05 #platform mass
+
+  P_IXX = 0.5 * P_M * (0.5 * P_DIA)**2 
+  P_IYY = 0.8333 * P_M * (3 * (0.5 * P_DIA)**2 + PL**2)
+  P_IZZ = P_IYY
+
+  D_IXX = 0.5 * D_M * (0.5 * D_DIA)**2 
+  D_IYY = 0.8333 * D_M * (3 * (0.5 * D_DIA)**2 + DL**2)
+  D_IZZ = D_IYY
+
+  B_IXX = 0.25 * B_M * RB**2
+  B_IYY = B_IXX
+  B_IZZ = 0.5 * B_M * RB**2
+
+  PL_IXX = 0.25 * B_M * RB**2
+  PL_IYY = B_IXX
+  PL_IZZ = 0.5 * B_M * RB**2
 
   BETA_1 = 0.523599
   BETA_2 = 0.523599
@@ -76,47 +100,49 @@
   DISTAL_JOINT_6_POSE_X = BASE_JOINT_6_POSE_X
   DISTAL_JOINT_6_POSE_Y = BASE_JOINT_6_POSE_Y - PL
 
-  PLATFORM_LINK_POSE_Z = Math.sqrt(DL**2 - (SP - SB)**2 - (RB + PL - RP)**2) + BH + PH
+  PLATFORM_LINK_POSE_Z = Math.sqrt(DL**2 - (SB - SP)**2 - (RP - RB - PL)**2)
 
   L_X1 = PLATFORM_JOINT_1_POSE_X - DISTAL_JOINT_1_POSE_X
   L_Y1 = PLATFORM_JOINT_1_POSE_Y - DISTAL_JOINT_1_POSE_Y
-  L_Z1 = BH + PLATFORM_LINK_POSE_Z
+  L_Z1 = PLATFORM_LINK_POSE_Z
   L_X2 = PLATFORM_JOINT_2_POSE_X - DISTAL_JOINT_2_POSE_X
   L_Y2 = PLATFORM_JOINT_2_POSE_Y - DISTAL_JOINT_2_POSE_Y
-  L_Z2 = BH + PLATFORM_LINK_POSE_Z
+  L_Z2 = PLATFORM_LINK_POSE_Z
   L_X3 = PLATFORM_JOINT_3_POSE_X - DISTAL_JOINT_3_POSE_X
   L_Y3 = PLATFORM_JOINT_3_POSE_Y - DISTAL_JOINT_3_POSE_Y
-  L_Z3 = BH + PLATFORM_LINK_POSE_Z
+  L_Z3 = PLATFORM_LINK_POSE_Z
   L_X4 = PLATFORM_JOINT_4_POSE_X - DISTAL_JOINT_4_POSE_X
   L_Y4 = PLATFORM_JOINT_4_POSE_Y - DISTAL_JOINT_4_POSE_Y
-  L_Z4 = BH + PLATFORM_LINK_POSE_Z
+  L_Z4 = PLATFORM_LINK_POSE_Z
   L_X5 = PLATFORM_JOINT_5_POSE_X - DISTAL_JOINT_5_POSE_X
   L_Y5 = PLATFORM_JOINT_5_POSE_Y - DISTAL_JOINT_5_POSE_Y
-  L_Z5 = BH + PLATFORM_LINK_POSE_Z
+  L_Z5 = PLATFORM_LINK_POSE_Z
   L_X6 = PLATFORM_JOINT_6_POSE_X - DISTAL_JOINT_6_POSE_X
   L_Y6 = PLATFORM_JOINT_6_POSE_Y - DISTAL_JOINT_6_POSE_Y
-  L_Z6 = BH + PLATFORM_LINK_POSE_Z
+  L_Z6 = PLATFORM_LINK_POSE_Z
 
   DISTAL_LINK_1_POSE_X = DISTAL_JOINT_1_POSE_X + 0.5 * L_X1
   DISTAL_LINK_1_POSE_Y = DISTAL_JOINT_1_POSE_Y + 0.5 * L_Y1
-  DISTAL_LINK_1_POSE_Z = 0.5 * L_Z1 + BH
+  DISTAL_LINK_1_POSE_Z = 0.5 * L_Z1 
   DISTAL_LINK_2_POSE_X = DISTAL_JOINT_2_POSE_X + 0.5 * L_X2
   DISTAL_LINK_2_POSE_Y = DISTAL_JOINT_2_POSE_Y + 0.5 * L_Y2
-  DISTAL_LINK_2_POSE_Z = 0.5 * L_Z2 + BH
+  DISTAL_LINK_2_POSE_Z = 0.5 * L_Z2 
   DISTAL_LINK_3_POSE_X = DISTAL_JOINT_3_POSE_X + 0.5 * L_X3
   DISTAL_LINK_3_POSE_Y = DISTAL_JOINT_3_POSE_Y + 0.5 * L_Y3
-  DISTAL_LINK_3_POSE_Z = 0.5 * L_Z3 + BH
+  DISTAL_LINK_3_POSE_Z = 0.5 * L_Z3 
   DISTAL_LINK_4_POSE_X = DISTAL_JOINT_4_POSE_X + 0.5 * L_X4
   DISTAL_LINK_4_POSE_Y = DISTAL_JOINT_4_POSE_Y + 0.5 * L_Y4
-  DISTAL_LINK_4_POSE_Z = 0.5 * L_Z4 + BH
+  DISTAL_LINK_4_POSE_Z = 0.5 * L_Z4
   DISTAL_LINK_5_POSE_X = DISTAL_JOINT_5_POSE_X + 0.5 * L_X5
   DISTAL_LINK_5_POSE_Y = DISTAL_JOINT_5_POSE_Y + 0.5 * L_Y5
-  DISTAL_LINK_5_POSE_Z = 0.5 * L_Z5 + BH
+  DISTAL_LINK_5_POSE_Z = 0.5 * L_Z5
   DISTAL_LINK_6_POSE_X = DISTAL_JOINT_6_POSE_X + 0.5 * L_X6
   DISTAL_LINK_6_POSE_Y = DISTAL_JOINT_6_POSE_Y + 0.5 * L_Y6
-  DISTAL_LINK_6_POSE_Z = 0.5 * L_Z6 + BH
+  DISTAL_LINK_6_POSE_Z = 0.5 * L_Z6
 
-  DISTAL_ROTATION = Math.asin((PLATFORM_LINK_POSE_Z) / (RB + PL))
+  DISTAL_ROTATION_Z = Math.atan((SB - SP) / (RP - RB - PL))
+  DISTAL_ROTATION_Y = Math.atan((PLATFORM_LINK_POSE_Z) / (RB + PL - RP))
+  DISTAL_ROTATION_X = Math.atan((PLATFORM_LINK_POSE_Z) / (SB - SP))
 
 %>	
   <plugin name="joint_controller" filename="libjoint_controller.so"/>
@@ -296,17 +322,17 @@
 	</joint>
 
   <link name="base_link">
-    <pose>0 0 <%= 0.5*BH %> 0 0 0</pose>
+    <pose>0 0 0 0 0 0</pose>
     <inertial>
-      <mass>10.0</mass>
-      <inertia>
-        <ixx>1.0</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>1.0</iyy> 
-        <iyz>0.0</iyz>
-        <izz>1.0</izz>
-      </inertia>
+    <mass><%= B_M %></mass>
+    <inertia>
+      <ixx><%= B_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= B_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= B_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
@@ -327,365 +353,365 @@
   </link>
 
   <link name="proximal_link_1">
-    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> <%= BH %> 0 0 <%= BETA_1 %></pose>
+    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> 0 0 0 <%= BETA_1 %></pose>
     <inertial>
-      <mass>0.18</mass>
+      <mass><%= P_M %></mass>
       <inertia>
-        <ixx>0.0002835</ixx>
+        <ixx><%= P_IXX %></ixx>
         <ixy>0.0</ixy>
         <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
+        <iyy><%= P_IYY %></iyy> 
         <iyz>0.0</iyz>
-        <izz>0.000324</izz>
+        <izz><%= P_IZZ %></izz>
       </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name="visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_2">
-    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> <%= BH %> 0 0 <%= BETA_2 %></pose>
+    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> 0 0 0 <%= BETA_2 %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_3">
-    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> <%= BH %> 0 0 <%= BETA_3 %></pose>
+    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> 0 0 0 <%= BETA_3 %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_4">
-    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> <%= BH %> 0 0 <%= BETA_4 %></pose>
+    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> 0 0 0 <%= BETA_4 %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_5">
-    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> <%= BH %> 0 0 <%= BETA_5 %></pose>
+    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> 0 0 0 <%= BETA_5 %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_6">
-    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> <%= BH %> 0 0 <%= BETA_6 %></pose>
+    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> 0 0 0 <%= BETA_6 %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= P_M %></mass>
+    <inertia>
+      <ixx><%= P_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= P_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= P_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= PL %> 0.01 0.01</size>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_1">
-    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z %> 0 <%= DISTAL_ROTATION %> <%= BETA_1 %></pose>
+    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z%> <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_1 + DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_2">
-    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_2 %></pose>
+    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z%>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_2 - DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_3">
-    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_3 %></pose>
+    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z%>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_3 + DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_4">
-    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_4 %></pose>
+    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z%>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_4 - DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_5">
-    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_5 %></pose>
+    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z%>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_5 + DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="distal_link_6">
-    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z %>  0 <%= DISTAL_ROTATION %> <%= BETA_6 %></pose>
+    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z%>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_6 - DISTAL_ROTATION_Z %></pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= D_M %></mass>
+    <inertia>
+      <ixx><%= D_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= D_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= D_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
         <box>
-          <size><%= DL %> 0.01 0.01</size>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
         </box> 
       </geometry>
     </visual>
   </link>
 
   <link name="platform_link">
-    <pose>0 0 <%= PLATFORM_LINK_POSE_Z %> 0 0 0</pose>
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z%> 0 0 0</pose>
     <inertial>
-      <mass>0.18</mass>
-      <inertia>
-        <ixx>0.0002835</ixx>
-        <ixy>0.0</ixy>
-        <ixz>0.0</ixz>
-        <iyy>0.0002835</iyy> 
-        <iyz>0.0</iyz>
-        <izz>0.000324</izz>
-      </inertia>
+    <mass><%= PL_M %></mass>
+    <inertia>
+      <ixx><%= PL_IXX %></ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy><%= PL_IYY %></iyy> 
+      <iyz>0.0</iyz>
+      <izz><%= PL_IZZ %></izz>
+    </inertia>
     </inertial>
     <collision name="collision">
       <geometry>
