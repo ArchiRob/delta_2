@@ -9,7 +9,7 @@
   PL = 0.2    #proximal link length
   DL = 0.4    #distal link length
 
-  BH = 0.01    #base height
+  BH = 0.1    #base height
   PH = 0.01    #platform height
 
   P_DIA = 0.02  #proximal diameter
@@ -234,7 +234,7 @@
   <joint name="distal_link_1_joint" type="ball">
 		<parent>proximal_link_1</parent>
 		<child>distal_link_1</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz><%= -S30 %> <%= C30 %> 0</xyz>
 		</axis>
@@ -337,7 +337,7 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius><%=RB %></radius>
+          <radius><%= Math.sqrt(RB**2 + SB**2) %></radius>
           <length><%= BH %></length>
         </cylinder> 
       </geometry>
@@ -345,7 +345,7 @@
     <visual name="visual">
       <geometry>
         <cylinder>
-          <radius><%= RB %></radius>
+          <radius><%= Math.sqrt(RB**2 + SB**2) %></radius>
           <length><%= BH %></length>
         </cylinder> 
       </geometry>
@@ -365,13 +365,13 @@
         <izz><%= P_IZZ %></izz>
       </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name="visual">
       <geometry>
         <box>
@@ -394,13 +394,13 @@
       <izz><%= P_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -423,13 +423,13 @@
       <izz><%= P_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -452,13 +452,13 @@
       <izz><%= P_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -481,13 +481,13 @@
       <izz><%= P_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -510,13 +510,13 @@
       <izz><%= P_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= PL %> <%= P_DIA %> <%= P_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -539,18 +539,20 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+      <cylinder>
+        <radius><%= 0.5 * D_DIA %></radius>
+        <length><%= DL %></length>
+      </cylinder> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
-        <box>
-          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-        </box> 
+        <cylinder>
+          <radius><%= 0.5 * D_DIA %></radius>
+          <length><%= DL %></length>
+        </cylinder> 
       </geometry>
     </visual>
   </link>
@@ -568,13 +570,13 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -597,13 +599,13 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -626,13 +628,13 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -655,13 +657,13 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -684,13 +686,13 @@
       <izz><%= D_IZZ %></izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -701,7 +703,7 @@
   </link>
 
   <link name="platform_link">
-    <pose>0 0 <%= PLATFORM_LINK_POSE_Z+ BH %> 0 0 0</pose>
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + BH %> 0 0 0</pose>
     <inertial>
     <mass><%= PL_M %></mass>
     <inertia>
@@ -716,7 +718,7 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius><%= RP %></radius>
+          <radius><%= Math.sqrt(RP**2 + SP**2) %></radius>
           <length><%= PH %></length>
         </cylinder>  
       </geometry>
@@ -724,7 +726,7 @@
     <visual name = "visual">
       <geometry>
         <cylinder>
-          <radius><%= RP %></radius>
+          <radius><%= Math.sqrt(RP**2 + SP**2) %></radius>
           <length><%= PH %></length>
         </cylinder> 
       </geometry>

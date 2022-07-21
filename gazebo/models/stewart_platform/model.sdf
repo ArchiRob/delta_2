@@ -91,7 +91,7 @@
   <joint name="distal_link_1_joint" type="ball">
 		<parent>proximal_link_1</parent>
 		<child>distal_link_1</child>
-		<pose>0.2 0 0 0 0 0</pose>
+		<pose> 0.2 0 0 0 0 0</pose>
 		<axis>
 			<xyz>-0.5000001943375613 0.8660252915835662 0</xyz>
 		</axis>
@@ -194,7 +194,7 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius>0.15</radius>
+          <radius>0.15524174696260024</radius>
           <length>0.1</length>
         </cylinder> 
       </geometry>
@@ -202,7 +202,7 @@
     <visual name="visual">
       <geometry>
         <cylinder>
-          <radius>0.15</radius>
+          <radius>0.15524174696260024</radius>
           <length>0.1</length>
         </cylinder> 
       </geometry>
@@ -222,13 +222,13 @@
         <izz>6.716398000000002e-05</izz>
       </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name="visual">
       <geometry>
         <box>
@@ -251,13 +251,13 @@
       <izz>6.716398000000002e-05</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -280,13 +280,13 @@
       <izz>6.716398000000002e-05</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -309,13 +309,13 @@
       <izz>6.716398000000002e-05</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -338,13 +338,13 @@
       <izz>6.716398000000002e-05</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -367,13 +367,13 @@
       <izz>6.716398000000002e-05</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.2 0.02 0.02</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.2 0.02 0.02</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -396,18 +396,20 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+      <cylinder>
+        <radius>0.005</radius>
+        <length>0.4</length>
+      </cylinder> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
-        <box>
-          <size>0.4 0.01 0.01</size>
-        </box> 
+        <cylinder>
+          <radius>0.005</radius>
+          <length>0.4</length>
+        </cylinder> 
       </geometry>
     </visual>
   </link>
@@ -425,13 +427,13 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -454,13 +456,13 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -483,13 +485,13 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -512,13 +514,13 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -541,13 +543,13 @@
       <izz>0.0001333904975</izz>
     </inertia>
     </inertial>
-    # <collision name="collision">
-    #   <geometry>
-    #     <box>
-    #       <size>0.4 0.01 0.01</size>
-    #     </box> 
-    #   </geometry>
-    # </collision>
+    <collision name="collision">
+      <geometry>
+        <box>
+          <size>0.4 0.01 0.01</size>
+        </box> 
+      </geometry>
+    </collision>
     <visual name = "visual">
       <geometry>
         <box>
@@ -573,7 +575,7 @@
     <collision name="collision">
       <geometry>
         <cylinder>
-          <radius>0.07</radius>
+          <radius>0.09899494936611666</radius>
           <length>0.01</length>
         </cylinder>  
       </geometry>
@@ -581,7 +583,7 @@
     <visual name = "visual">
       <geometry>
         <cylinder>
-          <radius>0.07</radius>
+          <radius>0.09899494936611666</radius>
           <length>0.01</length>
         </cylinder> 
       </geometry>

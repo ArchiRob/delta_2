@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <launch>
-    <env name="GAZEBO_PLUGIN_PATH" value="${GAZEBO_PLUGIN_PATH}:$(find delta_2)/gazebo/plugin/build" />
-    <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find delta_2)/gazebo/models" />
-
     <include file="$(find delta_2)/launch/spawn_stewart_model.launch" />
 
     <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
