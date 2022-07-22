@@ -13,8 +13,8 @@ class InverseKinematics:
         robot_name = "delta_2"
 
         #get geometry values form parameter server
-        rp = rospy.get_param('/' + robot_name + '/base_radius')
-        rb = rospy.get_param('/' + robot_name + '/platform_radius')
+        rb = rospy.get_param('/' + robot_name + '/base_radius')
+        rp = rospy.get_param('/' + robot_name + '/platform_radius')
         sb = rospy.get_param('/' + robot_name + '/base_joint_spacing')
         sp = rospy.get_param('/' + robot_name + '/platform_joint_spacing')
         self.ra = rospy.get_param('/' + robot_name + '/proximal_link_length')

@@ -236,41 +236,41 @@
 		<child>distal_link_1</child>
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz><%= -S30 %> <%= C30 %> 0</xyz>
+			<xyz>1 0 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_2_joint" type="ball">
 		<parent>proximal_link_2</parent>
 		<child>distal_link_2</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz><%= -S30 %> <%= C30 %> 0</xyz>
+			<xyz>1 0 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_3_joint" type="ball">
 		<parent>proximal_link_3</parent>
 		<child>distal_link_3</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz><%= -S30 %> <%= -C30 %> 0</xyz>
+			<xyz>1 0 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_4_joint" type="ball">
 		<parent>proximal_link_4</parent>
 		<child>distal_link_4</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
-			<xyz><%= -S30 %> <%= -C30 %> 0</xyz>
+			<xyz>1 0 0</xyz>
 		</axis>
 	</joint>
 
   <joint name="distal_link_5_joint" type="ball">
 		<parent>proximal_link_5</parent>
 		<child>distal_link_5</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
 		</axis>
@@ -279,7 +279,7 @@
   <joint name="distal_link_6_joint" type="ball">
 		<parent>proximal_link_6</parent>
 		<child>distal_link_6</child>
-		<pose><%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
+		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
 		</axis>
@@ -541,18 +541,16 @@
     </inertial>
     <collision name="collision">
       <geometry>
-      <cylinder>
-        <radius><%= 0.5 * D_DIA %></radius>
-        <length><%= DL %></length>
-      </cylinder> 
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
       </geometry>
     </collision>
     <visual name = "visual">
       <geometry>
-        <cylinder>
-          <radius><%= 0.5 * D_DIA %></radius>
-          <length><%= DL %></length>
-        </cylinder> 
+        <box>
+          <size><%= DL %> <%= D_DIA %> <%= D_DIA %></size>
+        </box> 
       </geometry>
     </visual>
   </link>
