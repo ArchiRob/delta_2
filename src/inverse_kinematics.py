@@ -9,16 +9,13 @@ from tf.transformations import euler_from_quaternion
 #todo: platform rotations are defined sequentially which leads to weird stuff, maybe quaternions can fix this?
 class InverseKinematics:
     def __init__(self):
-        #todo: work out how to define robot name outside of script
-        robot_name = "delta_2"
-
         #get geometry values form parameter server
-        rb = rospy.get_param('/' + robot_name + '/base_radius')
-        rp = rospy.get_param('/' + robot_name + '/platform_radius')
-        sb = rospy.get_param('/' + robot_name + '/base_joint_spacing')
-        sp = rospy.get_param('/' + robot_name + '/platform_joint_spacing')
-        self.ra = rospy.get_param('/' + robot_name + '/proximal_link_length')
-        self.rs = rospy.get_param('/' + robot_name + '/distal_link_length')
+        rb = rospy.get_param('/base_radius')
+        rp = rospy.get_param('/platform_radius')
+        sb = rospy.get_param('/base_joint_spacing')
+        sp = rospy.get_param('/platform_joint_spacing')
+        self.ra = rospy.get_param('/proximal_link_length')
+        self.rs = rospy.get_param('/distal_link_length')
 
         #angles of servo motors about centre of base
         self.beta = np.asarray([np.deg2rad(30), np.deg2rad(30), np.deg2rad(150), np.deg2rad(150), np.deg2rad(270), np.deg2rad(270)])
@@ -44,8 +41,8 @@ class InverseKinematics:
             [sb, -rb, 0]])
 
         #init publisher and subscriber
-        self.pub_servo_angles = rospy.Publisher('/' + robot_name + '/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
-        self.sub_platform_state = rospy.Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
+        self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
+        self.sub_platform_state = rospy.Subscriber('/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
         
     def callback(self, platform_state): #callback calculates servo angles
         #assign positions to vector X

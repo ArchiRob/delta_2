@@ -6,9 +6,6 @@
   <license>Apache License 2.0</license>
   <author email="lao15@ic.ac.uk">Lachlan</author>
   <maintainer email="lao15@ic.ac.uk">Lachlan</maintainer>
-  <url type="bugtracker">https://github.com/ROBOTIS-GIT/dynamixel-workbench/issues</url>
-  <url type="repository">https://github.com/ROBOTIS-GIT/dynamixel-workbench</url>
-  <url type="website">http://wiki.ros.org/dynamixel_workbench</url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
@@ -27,5 +24,4 @@
   <run_depend>message_generation</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <export></export>
 </package>

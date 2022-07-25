@@ -2,14 +2,14 @@
 <sdf version="1.4">
 <model name="stewart_platform">
 <%
-	RB = 0.15    #base radius
-  RP = 0.07    #platform radius
+	RB = 0.095    #base radius
+  RP = 0.04    #platform radius
   SB = 0.04   #base joint offset
-  SP = 0.07   #platform joint offset
-  PL = 0.2    #proximal link length
-  DL = 0.4    #distal link length
+  SP = 0.05   #platform joint offset
+  PL = 0.15    #proximal link length
+  DL = 0.3    #distal link length
 
-  BH = 0.1    #base height
+  BH = 0.04    #base height
   PH = 0.01    #platform height
 
   P_DIA = 0.02  #proximal diameter
@@ -343,17 +343,22 @@
       </geometry>
     </collision>
     <visual name="visual">
+    <pose>-0.124 0.105 -0.02 0 0 -1.5708</pose>
       <geometry>
-        <cylinder>
-          <radius><%= Math.sqrt(RB**2 + SB**2) %></radius>
-          <length><%= BH %></length>
-        </cylinder> 
+        <!-- <cylinder> -->
+          <!-- <radius><%= Math.sqrt(RB**2 + SB**2) %></radius> -->
+          <!-- <length><%= BH %></length> -->
+        <!-- </cylinder> --> 
+        <mesh>
+          <uri>model://stewart_platform/meshes/Stuart_base.dae</uri>
+          <scale> 0.001 0.001 0.001 </scale>
+        </mesh>
       </geometry>
     </visual>
   </link>
 
   <link name="proximal_link_1">
-    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> <%= BH %> 0 0 <%= BETA_1 %></pose>
+    <pose><%= PROXIMAL_LINK_1_POSE_X %> <%= PROXIMAL_LINK_1_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_1 %></pose>
     <inertial>
       <mass><%= P_M %></mass>
       <inertia>
@@ -382,7 +387,7 @@
   </link>
 
   <link name="proximal_link_2">
-    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> <%= BH %> 0 0 <%= BETA_2 %></pose>
+    <pose><%= PROXIMAL_LINK_2_POSE_X %> <%= PROXIMAL_LINK_2_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_2 %></pose>
     <inertial>
     <mass><%= P_M %></mass>
     <inertia>
@@ -411,7 +416,7 @@
   </link>
 
   <link name="proximal_link_3">
-    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> <%= BH %> 0 0 <%= BETA_3 %></pose>
+    <pose><%= PROXIMAL_LINK_3_POSE_X %> <%= PROXIMAL_LINK_3_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_3 %></pose>
     <inertial>
     <mass><%= P_M %></mass>
     <inertia>
@@ -440,7 +445,7 @@
   </link>
 
   <link name="proximal_link_4">
-    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> <%= BH %> 0 0 <%= BETA_4 %></pose>
+    <pose><%= PROXIMAL_LINK_4_POSE_X %> <%= PROXIMAL_LINK_4_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_4 %></pose>
     <inertial>
     <mass><%= P_M %></mass>
     <inertia>
@@ -469,7 +474,7 @@
   </link>
 
   <link name="proximal_link_5">
-    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> <%= BH %> 0 0 <%= BETA_5 %></pose>
+    <pose><%= PROXIMAL_LINK_5_POSE_X %> <%= PROXIMAL_LINK_5_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_5 %></pose>
     <inertial>
     <mass><%= P_M %></mass>
     <inertia>
@@ -498,7 +503,7 @@
   </link>
 
   <link name="proximal_link_6">
-    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> <%= BH %> 0 0 <%= BETA_6 %></pose>
+    <pose><%= PROXIMAL_LINK_6_POSE_X %> <%= PROXIMAL_LINK_6_POSE_Y %> <%= 0.5 * BH %> 0 0 <%= BETA_6 %></pose>
     <inertial>
     <mass><%= P_M %></mass>
     <inertia>
@@ -527,7 +532,7 @@
   </link>
 
   <link name="distal_link_1">
-    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z + BH %> <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_1 + DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z + 0.5 * BH %> <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_1 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -556,7 +561,7 @@
   </link>
 
   <link name="distal_link_2">
-    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z+ BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_2 - DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_2 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -585,7 +590,7 @@
   </link>
 
   <link name="distal_link_3">
-    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z+ BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_3 + DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_3 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -614,7 +619,7 @@
   </link>
 
   <link name="distal_link_4">
-    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z+ BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_4 - DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_4 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -643,7 +648,7 @@
   </link>
 
   <link name="distal_link_5">
-    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z+ BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_5 + DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_5 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -672,7 +677,7 @@
   </link>
 
   <link name="distal_link_6">
-    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z+ BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_6 - DISTAL_ROTATION_Z %></pose>
+    <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_6 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
     <inertia>
@@ -701,7 +706,7 @@
   </link>
 
   <link name="platform_link">
-    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + BH %> 0 0 0</pose>
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + 0.5 * BH %> 0 0 0</pose>
     <inertial>
     <mass><%= PL_M %></mass>
     <inertia>

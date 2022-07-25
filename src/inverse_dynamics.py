@@ -11,15 +11,13 @@ from message_filters import ApproximateTimeSynchronizer, Subscriber
 
 class InverseDynamics:
     def __init__(self):
-        robot_name = "delta_2"
-
         #get geometry values form parameter server
-        rp = rospy.get_param('/' + robot_name + '/base_radius')
-        rb = rospy.get_param('/' + robot_name + '/platform_radius')
-        sb = rospy.get_param('/' + robot_name + '/base_joint_spacing')
-        sp = rospy.get_param('/' + robot_name + '/platform_joint_spacing')
-        self.ra = rospy.get_param('/' + robot_name + '/proximal_link_length')
-        self.rs = rospy.get_param('/' + robot_name + '/distal_link_length')
+        rb = rospy.get_param('/base_radius')
+        rp = rospy.get_param('/platform_radius')
+        sb = rospy.get_param('/base_joint_spacing')
+        sp = rospy.get_param('/platform_joint_spacing')
+        self.ra = rospy.get_param('/proximal_link_length')
+        self.rs = rospy.get_param('/distal_link_length')
 
         #angles of servo motors about centre of base
         self.beta = np.asarray([np.deg2rad(30), np.deg2rad(30), np.deg2rad(150), np.deg2rad(150), np.deg2rad(270), np.deg2rad(270)])
@@ -48,10 +46,10 @@ class InverseDynamics:
         self.J2_inv = np.identity(6)
 
         #init publisher and subscriber
-        self.pub_servo_velocities = rospy.Publisher('/' + robot_name + '/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
-        sub_platform_vel = Subscriber('/' + robot_name + '/platform_setpoint/twist', TwistStamped) #target twist subscriber
-        sub_platform_pose = Subscriber('/' + robot_name + '/platform_setpoint/pose', PoseStamped) #target pose subscriber
-        sub_servo_angles = Subscriber('/' + robot_name + '/servo_setpoint/positions', ServoAngles6DoFStamped) #servo angle subscriber
+        self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
+        sub_platform_vel = Subscriber('/platform_setpoint/twist', TwistStamped) #target twist subscriber
+        sub_platform_pose = Subscriber('/platform_setpoint/pose', PoseStamped) #target pose subscriber
+        sub_servo_angles = Subscriber('/servo_setpoint/positions', ServoAngles6DoFStamped) #servo angle subscriber
 
         ts = ApproximateTimeSynchronizer([sub_platform_vel, sub_platform_pose, sub_servo_angles], queue_size=1, slop=0.05)
         ts.registerCallback(self.vel_callback)
