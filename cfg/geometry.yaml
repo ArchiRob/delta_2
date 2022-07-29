@@ -1,8 +1,8 @@
 
 #manipulator geometry parameters:
 base_radius:               0.095
-platform_radius:           0.04
+platform_radius:           0.06
 base_joint_spacing:        0.04
-platform_joint_spacing:    0.05
-proximal_link_length:      0.15
+platform_joint_spacing:    0.04
+proximal_link_length:      0.1
 distal_link_length:        0.3

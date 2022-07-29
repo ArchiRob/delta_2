@@ -47,7 +47,7 @@ class InverseDynamics:
 
         #init publisher and subscriber
         self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
-        sub_platform_vel = Subscriber('/platform_setpoint/twist', TwistStamped) #target twist subscriber
+        sub_platform_vel = Subscriber('/platform_setpoint/velocity', TwistStamped) #target twist subscriber
         sub_platform_pose = Subscriber('/platform_setpoint/pose', PoseStamped) #target pose subscriber
         sub_servo_angles = Subscriber('/servo_setpoint/positions', ServoAngles6DoFStamped) #servo angle subscriber
 

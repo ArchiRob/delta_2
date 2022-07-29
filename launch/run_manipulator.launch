@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- Launch file for running the delta-arm only -->
+<launch>
+  <arg name="sim" default="true"/>
+
+  <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
+
+  <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+  <node name="InverseDynamics" pkg="delta_2" type="inverse_dynamics.py" required="true" output="screen"/>
+
+  <group if="$(arg sim)">
+    <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
+  </group>
+</launch>

@@ -3,10 +3,10 @@
 <model name="stewart_platform">
 <%
 	RB = 0.095    #base radius
-  RP = 0.04    #platform radius
+  RP = 0.06    #platform radius
   SB = 0.04   #base joint offset
-  SP = 0.05   #platform joint offset
-  PL = 0.15    #proximal link length
+  SP = 0.04   #platform joint offset
+  PL = 0.1    #proximal link length
   DL = 0.3    #distal link length
 
   BH = 0.04    #base height
@@ -144,6 +144,8 @@
   DISTAL_ROTATION_Y = Math.atan((PLATFORM_LINK_POSE_Z) / (RB + PL - RP))
   DISTAL_ROTATION_X = Math.atan((PLATFORM_LINK_POSE_Z) / (SB - SP))
 
+  JOINT_FRICTION = 0.1
+  JOINT_DAMPING = 0.001
 %>	
   <plugin name="joint_controller" filename="libjoint_controller.so"/>
 
@@ -158,6 +160,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -172,6 +178,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+        <damping><%= JOINT_DAMPING %></damping>
+        <friction><%= JOINT_FRICTION %></friction>
+      </dynamics>
 		</axis>
 	</joint>
 
@@ -186,6 +196,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -200,6 +214,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -214,6 +232,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -228,6 +250,10 @@
 				<upper> 1.57079 </upper>
 				<velocity> 1 </velocity>
 			</limit>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -237,6 +263,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -246,6 +276,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -255,6 +289,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -264,6 +302,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -273,6 +315,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -282,6 +328,10 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
 		</axis>
 	</joint>
 
@@ -289,37 +339,74 @@
 		<parent>distal_link_1</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_1_POSE_X %> <%= PLATFORM_JOINT_1_POSE_Y %> 0 0 0 0</pose>
+		<axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
 
   <joint name="platform_link_2_joint" type="ball">
 		<parent>distal_link_2</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_2_POSE_X %> <%= PLATFORM_JOINT_2_POSE_Y %> 0 0 0 0</pose>
+    <axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
 
   <joint name="platform_link_3_joint" type="ball">
 		<parent>distal_link_3</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_3_POSE_X %> <%= PLATFORM_JOINT_3_POSE_Y %> 0 0 0 0</pose>
+    <axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
 
   <joint name="platform_link_4_joint" type="ball">
 		<parent>distal_link_4</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_4_POSE_X %> <%= PLATFORM_JOINT_4_POSE_Y %> 0 0 0 0</pose>
+    <axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
 
   <joint name="platform_link_5_joint" type="ball">
 		<parent>distal_link_5</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_5_POSE_X %> <%= PLATFORM_JOINT_5_POSE_Y %> 0 0 0 0</pose>
+    <axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
 
   <joint name="platform_link_6_joint" type="ball">
 		<parent>distal_link_6</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_6_POSE_X %> <%= PLATFORM_JOINT_6_POSE_Y %> 0 0 0 0</pose>
+    <axis>
+      <dynamics>
+      <damping><%= JOINT_DAMPING %></damping>
+      <friction><%= JOINT_FRICTION %></friction>
+    </dynamics>
+		</axis>
 	</joint>
+
 
   <link name="base_link">
     <pose>0 0 <%= 0.5 * BH %> 0 0 0</pose>

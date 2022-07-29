@@ -44,6 +44,6 @@ def config_callback(config, level):
 if __name__ == '__main__': #initialise node
     rospy.init_node('test_setpoint_publisher')
     setpoint_pub = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
-    vel_setpoint_pub = rospy.Publisher('/platform_setpoint/twist', TwistStamped, queue_size=1, tcp_nodelay=True)
+    vel_setpoint_pub = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
     srv = Server(TestSetpointConfig, config_callback)
     rospy.spin()

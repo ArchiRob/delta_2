@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 import rospy
 import numpy as np
-from geometry_msgs.msg import PoseStamped
+import tf2_ros
+from geometry_msgs.msg import PoseStamped, TransformStamped
 from delta_2.msg import ServoAngles6DoFStamped
 from tf.transformations import euler_from_quaternion
 
 #code to determine servo positions from end effector pose setpoints
-#todo: platform rotations are defined sequentially which leads to weird stuff, maybe quaternions can fix this?
 class InverseKinematics:
     def __init__(self):
         #get geometry values form parameter server
@@ -43,6 +43,10 @@ class InverseKinematics:
         #init publisher and subscriber
         self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
         self.sub_platform_state = rospy.Subscriber('/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
+
+        #init tf broadcaster
+        self.br = tf2_ros.TransformBroadcaster()
+        
         
     def callback(self, platform_state): #callback calculates servo angles
         #assign positions to vector X
@@ -60,6 +64,7 @@ class InverseKinematics:
         p_w = np.zeros((6,3))
         L_w = np.zeros((6,3))
         Theta = np.zeros(6)
+        angle = np.zeros(6)
 
         #calculate platform rotation matrix wRp
         cphi = np.cos(phi)
@@ -95,11 +100,35 @@ class InverseKinematics:
             N = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[i,0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[i,1] - self.b_w[i,1]))
             disc = L / np.sqrt(M**2 + N**2)
 
-            #check solution exists -> disc must be in domain of arcsin(), [-1,1]
+            #check real solution exists -> disc must be in domain of arcsin(), [-1,1]
             if (disc >= 1.0) or (disc <= -1.0):
                 Theta[i] = np.nan
             else:
                 Theta[i] = np.arcsin(disc) - np.arctan(N / M)
+
+        # if not np.any(np.isnan(Theta)):
+        #     #ensure robot wont turn itself inside out (angle between distal linkage and platform cannot exceed 180degrees)
+        #     c30 = np.cos(np.deg2rad(30))
+        #     s30 = np.sin(np.deg2rad(30))
+        #     sTheta = np.sin(Theta)
+        #     cTheta = np.cos(Theta)
+        #     a_w = np.asarray([[self.ra * c30 * cTheta[0], self.ra * s30 * cTheta[0], self.ra * sTheta[0]],
+        #             [self.ra * c30 * cTheta[1], self.ra * s30 * cTheta[1], self.ra * sTheta[1]],
+        #             [-self.ra * c30 * cTheta[2], self.ra * s30 * cTheta[2], self.ra * sTheta[2]],
+        #             [-self.ra * c30 * cTheta[3], self.ra * s30 * cTheta[3], self.ra * sTheta[3]],
+        #             [0, -self.ra * cTheta[4], self.ra * sTheta[4]],
+        #             [0, -self.ra * cTheta[5], self.ra * sTheta[5]]])
+
+        #     #distal linkage vector
+        #     l_w = p_w - a_w
+
+        #     for i in range(6):
+        #         angle[i] = np.arccos(np.dot(p_w[i,:],l_w[i,:]) / (np.linalg.norm(p_w[i,:]) * np.linalg.norm(l_w[i,:])))
+        #         if angle[i] > np.pi:
+        #             Theta[i] = np.nan
+
+        #     print(angle)
+
 
         #publish if all servo angles have been solved
         if not np.any(np.isnan(Theta)):
@@ -113,6 +142,20 @@ class InverseKinematics:
             servo_angles.Theta5 = np.rad2deg(Theta[4])
             servo_angles.Theta6 = np.rad2deg(Theta[5])
             self.pub_servo_angles.publish(servo_angles)
+
+            #broadcast transform
+            t = TransformStamped()
+            t.header.stamp = platform_state.header.stamp
+            t.header.frame_id = 'stewart_base'
+            t.child_frame_id = 'platform'
+            t.transform.translation.x = platform_state.pose.position.x
+            t.transform.translation.y = platform_state.pose.position.y
+            t.transform.translation.z = platform_state.pose.position.z
+            t.transform.rotation.x = platform_state.pose.orientation.x
+            t.transform.rotation.y = platform_state.pose.orientation.y
+            t.transform.rotation.z = platform_state.pose.orientation.z
+            t.transform.rotation.w = platform_state.pose.orientation.w
+            self.br.sendTransform(t)
         else:
             rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS WORKSPACE")
 
