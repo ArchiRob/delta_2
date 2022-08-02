@@ -3,7 +3,7 @@
 <model name="stewart_platform">
 <%
 	RB = 0.095    #base radius
-  RP = 0.07    #platform radius
+  RP = 0.04    #platform radius
   SB = 0.04   #base joint offset
   SP = 0.04   #platform joint offset
   PL = 0.1    #proximal link length
@@ -158,7 +158,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
@@ -176,7 +176,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
         <damping><%= JOINT_DAMPING %></damping>
@@ -194,7 +194,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
@@ -212,7 +212,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
@@ -230,7 +230,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
@@ -248,7 +248,7 @@
       <limit>
 				<lower> -0.785398 </lower>
 				<upper> 1.57079 </upper>
-				<velocity> 1 </velocity>
+				<velocity> 0.5 </velocity>
 			</limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
@@ -263,6 +263,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
@@ -276,6 +279,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
@@ -289,6 +295,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
@@ -302,6 +311,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
@@ -315,6 +327,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
@@ -328,6 +343,9 @@
 		<pose> <%= -DISTAL_LINK_MIDPOINT_OFFSET %> 0 0 0 0 0</pose>
 		<axis>
 			<xyz>1 0 0</xyz>
+      <limit>
+        <velocity> 0.5 </velocity>
+      </limit>
       <dynamics>
       <damping><%= JOINT_DAMPING %></damping>
       <friction><%= JOINT_FRICTION %></friction>
