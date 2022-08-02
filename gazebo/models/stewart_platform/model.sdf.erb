@@ -3,7 +3,7 @@
 <model name="stewart_platform">
 <%
 	RB = 0.095    #base radius
-  RP = 0.06    #platform radius
+  RP = 0.07    #platform radius
   SB = 0.04   #base joint offset
   SP = 0.04   #platform joint offset
   PL = 0.1    #proximal link length
@@ -144,8 +144,8 @@
   DISTAL_ROTATION_Y = Math.atan((PLATFORM_LINK_POSE_Z) / (RB + PL - RP))
   DISTAL_ROTATION_X = Math.atan((PLATFORM_LINK_POSE_Z) / (SB - SP))
 
-  JOINT_FRICTION = 0.1
-  JOINT_DAMPING = 0.001
+  JOINT_FRICTION = 0.01
+  JOINT_DAMPING = 0.0001
 %>	
   <plugin name="joint_controller" filename="libjoint_controller.so"/>
 
@@ -339,74 +339,75 @@
 		<parent>distal_link_1</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_1_POSE_X %> <%= PLATFORM_JOINT_1_POSE_Y %> 0 0 0 0</pose>
-		<axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
 	</joint>
 
   <joint name="platform_link_2_joint" type="ball">
 		<parent>distal_link_2</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_2_POSE_X %> <%= PLATFORM_JOINT_2_POSE_Y %> 0 0 0 0</pose>
-    <axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
 	</joint>
 
   <joint name="platform_link_3_joint" type="ball">
 		<parent>distal_link_3</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_3_POSE_X %> <%= PLATFORM_JOINT_3_POSE_Y %> 0 0 0 0</pose>
-    <axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
 	</joint>
 
   <joint name="platform_link_4_joint" type="ball">
 		<parent>distal_link_4</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_4_POSE_X %> <%= PLATFORM_JOINT_4_POSE_Y %> 0 0 0 0</pose>
-    <axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
 	</joint>
 
   <joint name="platform_link_5_joint" type="ball">
 		<parent>distal_link_5</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_5_POSE_X %> <%= PLATFORM_JOINT_5_POSE_Y %> 0 0 0 0</pose>
-    <axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
 	</joint>
 
   <joint name="platform_link_6_joint" type="ball">
 		<parent>distal_link_6</parent>
 		<child>platform_link</child>
 		<pose><%= PLATFORM_JOINT_6_POSE_X %> <%= PLATFORM_JOINT_6_POSE_Y %> 0 0 0 0</pose>
-    <axis>
-      <dynamics>
-      <damping><%= JOINT_DAMPING %></damping>
-      <friction><%= JOINT_FRICTION %></friction>
-    </dynamics>
-		</axis>
+  </joint>
+
+  <!-- <joint name="nozzle_joint" type="fixed">
+		<parent>platform_link</parent>
+		<child>nozzle</child>
+		<pose>0 0 0 0 0 0</pose>
 	</joint>
 
+  <link name="nozzle">
+    <pose>0 0 <%= PLATFORM_LINK_POSE_Z + 0.5 * BH + 0.025 %> 0 0 0</pose>
+    <inertial>
+    <mass><%= 0.01 %></mass>
+    <inertia>
+      <ixx>1.2500000000000001e-08</ixx>
+      <ixy>0.0</ixy>
+      <ixz>0.0</ixz>
+      <iyy>7.50594975e-08</iyy> 
+      <iyz>0.0</iyz>
+      <izz>7.50594975e-08</izz>
+    </inertia>
+    </inertial>
+    <collision name="collision">
+      <geometry>
+        <cylinder>
+          <radius><%= 0.02 %></radius>
+          <length><%= 0.05 %></length>
+        </cylinder> 
+      </geometry>
+    </collision>
+    <visual name="visual">
+    <pose>0 0 0 0 0 0</pose>
+      <geometry>
+        <cylinder>
+          <radius><%= 0.02 %></radius>
+          <length><%= 0.05 %></length>
+        </cylinder>
+      </geometry>
+    </visual>
+  </link> -->
 
   <link name="base_link">
     <pose>0 0 <%= 0.5 * BH %> 0 0 0</pose>
@@ -619,6 +620,7 @@
   </link>
 
   <link name="distal_link_1">
+    <gravity>false</gravity>
     <pose><%= DISTAL_LINK_1_POSE_X %> <%= DISTAL_LINK_1_POSE_Y %> <%= DISTAL_LINK_1_POSE_Z + 0.5 * BH %> <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_1 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -648,6 +650,7 @@
   </link>
 
   <link name="distal_link_2">
+  <gravity>false</gravity>
     <pose><%= DISTAL_LINK_2_POSE_X %> <%= DISTAL_LINK_2_POSE_Y %> <%= DISTAL_LINK_2_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_2 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -677,6 +680,7 @@
   </link>
 
   <link name="distal_link_3">
+  <gravity>false</gravity>
     <pose><%= DISTAL_LINK_3_POSE_X %> <%= DISTAL_LINK_3_POSE_Y %> <%= DISTAL_LINK_3_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_3 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -706,6 +710,7 @@
   </link>
 
   <link name="distal_link_4">
+  <gravity>false</gravity>
     <pose><%= DISTAL_LINK_4_POSE_X %> <%= DISTAL_LINK_4_POSE_Y %> <%= DISTAL_LINK_4_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_4 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -735,6 +740,7 @@
   </link>
 
   <link name="distal_link_5">
+  <gravity>false</gravity>
     <pose><%= DISTAL_LINK_5_POSE_X %> <%= DISTAL_LINK_5_POSE_Y %> <%= DISTAL_LINK_5_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_5 + DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -764,6 +770,7 @@
   </link>
 
   <link name="distal_link_6">
+  <gravity>false</gravity>
     <pose><%= DISTAL_LINK_6_POSE_X %> <%= DISTAL_LINK_6_POSE_Y %> <%= DISTAL_LINK_6_POSE_Z+ 0.5 * BH %>  <%= DISTAL_ROTATION_X %> <%= DISTAL_ROTATION_Y %> <%= BETA_6 - DISTAL_ROTATION_Z %></pose>
     <inertial>
     <mass><%= D_M %></mass>
@@ -793,6 +800,7 @@
   </link>
 
   <link name="platform_link">
+  <gravity>false</gravity>
     <pose>0 0 <%= PLATFORM_LINK_POSE_Z + 0.5 * BH %> 0 0 0</pose>
     <inertial>
     <mass><%= PL_M %></mass>
