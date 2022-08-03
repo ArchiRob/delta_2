@@ -6,7 +6,7 @@
     <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find px4)/Tools/sitl_gazebo/models" />
     <env name="ROS_PACKAGE_PATH" value="${ROS_PACKAGE_PATH}:$/(find px4)" />
     <env name="ROS_PACKAGE_PATH" value="${ROS_PACKAGE_PATH}:$/(find px4)/Tools/sitl_gazebo" />  -->
-
+    <param name="model_name" value="Hex_delta"/>
     <!-- vehicle pose -->
     <arg name="x" default="0"/>
     <arg name="y" default="0"/>
