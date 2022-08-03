@@ -5,6 +5,7 @@ import tf2_ros
 from geometry_msgs.msg import PoseStamped, TransformStamped
 from delta_2.msg import ServoAngles6DoFStamped
 from tf.transformations import euler_from_quaternion
+from mavros_msgs.msg import State
 
 #code to determine servo positions from end effector pose setpoints
 class InverseKinematics:
@@ -40,14 +41,42 @@ class InverseKinematics:
             [-sb, -rb, 0],
             [sb, -rb, 0]])
 
+        #broadcast center of manipulator workspace (roughly) as a static tf
+        br_static = tf2_ros.StaticTransformBroadcaster()
+        tf_workspace = TransformStamped()
+        tf_workspace.header.frame_id = "stewart_base"
+        tf_workspace.header.stamp = rospy.Time.now()
+        tf_workspace.child_frame_id = "workspace_center"
+        tf_workspace.transform.translation.x = 0.0
+        tf_workspace.transform.translation.y = 0.0
+        tf_workspace.transform.translation.z = np.sqrt(self.rs**2 - (rb + self.ra - rp)**2)
+        tf_workspace.transform.rotation.x = 0.0
+        tf_workspace.transform.rotation.y = 0.0
+        tf_workspace.transform.rotation.z = 0.0
+        tf_workspace.transform.rotation.w = 1.0
+        br_static.sendTransform(tf_workspace)
+
         #init publisher and subscriber
         self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
         self.sub_platform_state = rospy.Subscriber('/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
 
         #init tf broadcaster
         self.br = tf2_ros.TransformBroadcaster()
+
+        # #send initial pose setpoint so arm doesn't sag after being turned on
+        # servo_angles_init = ServoAngles6DoFStamped()
+        # servo_angles_init.header.frame_id = "servo"
+        # servo_angles_init.header.stamp = rospy.Time.now()
+        # servo_angles_init.Theta1 = 0.0
+        # servo_angles_init.Theta2 = 0.0
+        # servo_angles_init.Theta3 = 0.0
+        # servo_angles_init.Theta4 = 0.0
+        # servo_angles_init.Theta5 = 0.0
+        # servo_angles_init.Theta6 = 0.0
+        # rospy.wait_for_message('/mavros/local_position/pose', PoseStamped)
+        # self.pub_servo_angles.publish(servo_angles_init)
         
-        
+
     def callback(self, platform_state): #callback calculates servo angles
         #assign positions to vector X
         X = np.asarray([platform_state.pose.position.x, 

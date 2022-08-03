@@ -34,10 +34,14 @@ namespace gazebo
             m_model = _model;
             m_joints = m_model->GetJoints();
 
-            common::PID pid(1.0, 0.5, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_pos(0.5, 0.1, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_vel(0.03, 0.01, 0.0); //placeholder values, need to do an input parameter for this
 
             for (const auto& joint: m_joints)
-                m_model->GetJointController()->SetPositionPID(joint->GetScopedName(), pid);
+                m_model->GetJointController()->SetPositionPID(joint->GetScopedName(), pid_pos);
+            
+            for (const auto& joint: m_joints)
+                m_model->GetJointController()->SetVelocityPID(joint->GetScopedName(), pid_vel);
 
             int argc = 0;
             ros::init(argc, nullptr, "gazebo_client", ros::init_options::NoSigintHandler);
@@ -51,7 +55,17 @@ namespace gazebo
                 ros::VoidPtr(),
                 &m_ros_queue);
 
-            m_ros_sub = m_nh->subscribe(so);
+            m_ros_sub = m_nh->subscribe(so); 
+
+            // Subscribe to /model_name/position_cmd topic (you publish to this to set positions)
+            ros::SubscribeOptions sv = ros::SubscribeOptions::create<std_msgs::Float32MultiArray>(
+                "/" + m_model->GetName() + "/velocity_cmd", 
+                100, 
+                boost::bind(&SDFJointController::setVelocity, this, _1),
+                ros::VoidPtr(),
+                &m_ros_queue);
+
+            v_ros_sub = m_nh->subscribe(sv); 
 
             // Set up a handler so we don't block here
             m_ros_queue_thread = std::thread(std::bind(&SDFJointController::queueThread, this));
@@ -62,6 +76,13 @@ namespace gazebo
             auto joints_it = std::begin(m_joints);
             for (auto data_it = std::begin(msg->data); data_it != std::end(msg->data); ++data_it)
                 m_model->GetJointController()->SetPositionTarget((*joints_it++)->GetScopedName(), *data_it);
+        }
+
+        void setVelocity(const std_msgs::Float32MultiArray::ConstPtr& msg)
+        {
+            auto joints_it = std::begin(m_joints);
+            for (auto data_it = std::begin(msg->data); data_it != std::end(msg->data); ++data_it)
+                m_model->GetJointController()->SetVelocityTarget((*joints_it++)->GetScopedName(), *data_it);
         }
 
     private:
@@ -76,6 +97,7 @@ namespace gazebo
 
         ros::CallbackQueue m_ros_queue;
         ros::Subscriber m_ros_sub;
+        ros::Subscriber v_ros_sub;
 
         std::thread m_ros_queue_thread;
         std::unique_ptr<ros::NodeHandle> m_nh;

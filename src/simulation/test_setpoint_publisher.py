@@ -29,9 +29,9 @@ def config_callback(config, level):
     vel_setpoint = TwistStamped()
     vel_setpoint.header.frame_id = "base"
     vel_setpoint.header.stamp = rospy.Time.now()
-    vel_setpoint.twist.angular.x = np.deg2rad(config.phi_dot)
-    vel_setpoint.twist.angular.y =  np.deg2rad(config.psi_dot)
-    vel_setpoint.twist.angular.z =  np.deg2rad(config.theta_dot)
+    vel_setpoint.twist.angular.x = np.deg2rad(config.psi_dot)
+    vel_setpoint.twist.angular.y =  np.deg2rad(config.theta_dot)
+    vel_setpoint.twist.angular.z =  np.deg2rad(config.phi_dot)
     vel_setpoint.twist.linear.x = config.x_dot
     vel_setpoint.twist.linear.y = config.y_dot
     vel_setpoint.twist.linear.z = config.z_dot

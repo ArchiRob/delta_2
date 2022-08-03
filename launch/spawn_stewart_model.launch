@@ -19,6 +19,4 @@
       <arg name = "headless" value = "$(arg headless)" />
       <arg name = "verbose" value = "$(arg verbose)" />
     </include>
-
-    <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
 </launch>

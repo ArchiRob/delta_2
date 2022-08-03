@@ -120,21 +120,24 @@ plot3([p_w(1,6),p_w(1,1)], [p_w(2,6),p_w(2,1)], [p_w(3,6),p_w(3,1)])
 
 %% velocity kinematics
 
-x_dot = 0.0;
-y_dot = 0.0;
-z_dot = 0.0;
-psi_dot = 0.0;
-theta_dot = 0.0;
-phi_dot = 0.0;
+theta = theta - 90;
+
+cphi = cosd(phi);
+cpsi = cosd(psi);
+ctheta = cosd(theta);
+sphi = sind(phi);
+spsi = sind(psi);
+stheta = sind(theta);
 
 q_dot = [x_dot, y_dot, z_dot, psi_dot, theta_dot, phi_dot].';
 
 n =  zeros(3,6);
 J1_inv = zeros(6,6);
 
+n = L_w ./ vecnorm(L_w);
+
 for i = 1:6
-    n(:,i) = L_w(:,i) / norm(L_w(:,i));
-    J1_inv(i,:) = [n(:,i).', [wRp * cross(p_p(:,i), n(:,i))].'];
+    J1_inv(i,:) = [n(:,i).', (wRp * cross(p_p(:,i), n(:,i))).'];
 end
 
 omega = [0, cpsi, spsi * stheta;
@@ -146,6 +149,4 @@ J2_inv = [eye(3,3), zeros(3,3);
 
 L_w_dot = J1_inv * J2_inv * q_dot;
 
-for i = 1:6
-    Theta_dot(i) = L_w_dot(i) / (M(i) * cosd(Theta(i)) - N(i) * sind(Theta(i)));
-end
+Theta_dot = L_w_dot ./ (M .* cosd(Theta) - N .* sind(Theta)).'

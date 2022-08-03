@@ -42,9 +42,6 @@ class InverseDynamics:
             [-sb, -rb, 0],
             [sb, -rb, 0]])
 
-        #initialise Jacobean
-        self.J2_inv = np.identity(6)
-
         #init publisher and subscriber
         self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
         sub_platform_vel = Subscriber('/platform_setpoint/velocity', TwistStamped) #target twist subscriber
@@ -61,6 +58,7 @@ class InverseDynamics:
         n = np.zeros((6,3))
         p = np.zeros((6,3))
         J1_inv = np.zeros((6,6))
+        J2_inv = np.identity(6)
         Theta_dot = np.zeros(6)
         M = np.zeros(6)
         N = np.zeros(6)
@@ -73,13 +71,13 @@ class InverseDynamics:
                                 np.deg2rad(servo_angles.Theta5), 
                                 np.deg2rad(servo_angles.Theta6)])
 
-        #convert quaternion to Euler angles
-        (psi, theta, phi) = euler_from_quaternion([platform_pose.pose.orientation.x, platform_pose.pose.orientation.y, platform_pose.pose.orientation.z, platform_pose.pose.orientation.w])
+        #get Euler angles from quaternion
+        (psi, theta, phi) = euler_from_quaternion([platform_pose.pose.orientation.x, 
+                                                    platform_pose.pose.orientation.y, 
+                                                    platform_pose.pose.orientation.z, 
+                                                    platform_pose.pose.orientation.w])
 
-        #Q is the target state vector (x,y,z,phi,psi,theta)
-        Q = np.asarray([platform_pose.pose.position.x, platform_pose.pose.position.y, platform_pose.pose.position.z, phi, psi, theta])
-        
-        #assign rotations to rotation matrix wRp (from platform to world coordinates)
+        #calculate platform rotation matrix wRp
         cphi = np.cos(phi)
         sphi = np.sin(phi)
         cpsi = np.cos(psi)
@@ -101,34 +99,46 @@ class InverseDynamics:
 
         wRp = np.matmul(np.matmul(Rpsi, Rtheta), Rphi)
 
-        #angular velocities
-        omega = np.asarray([[0, cpsi, spsi * stheta],
-                [0, spsi, -cpsi * stheta],
-                [1, 0, ctheta]])
-        
-        #determine J2_inv
-        self.J2_inv[3:6, 3:6] = omega
-   
-        #assign velocities to vector q_dot
-        Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
-                            platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
-        
+        X = np.asarray([platform_pose.pose.position.x, 
+                        platform_pose.pose.position.y, 
+                        platform_pose.pose.position.z])
+
         for i in range(6):
-            #the following 4 lines are repeated from inverse kinematics to obtain useful intermediate variables
-            p_w[i,:] = Q[0:3] + np.matmul(wRp, self.p_p[i,:])
+            #calculate distances from platform and base joints
+            p_w[i,:] = X + np.matmul(wRp, self.p_p[i,:])
             L_w[i,:] = p_w[i,:] - self.b_w[i,:]
             M[i] = 2 * self.ra * p_w[i,2]
             N[i] = 2 * self.ra * (np.cos(self.beta[i]) * (p_w[i,0] - self.b_w[i,0]) + np.sin(self.beta[i]) * (p_w[i,1] - self.b_w[i,1]))
 
+        #rotate to avoid singularity when platform is level
+        theta = theta - np.pi/2
+        ctheta = np.cos(theta)
+        stheta = np.sin(theta)
+
+        #assign velocities to vector q_dot
+        #angular velocities are assigned in a weird order to represent a frame rotation of -pi/2 about the x axis. This allows us to avoid a singularity.
+        Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
+                            platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
+        
+        for i in range(6):
             #this is the new stuff to calculate velocities
-            n[i,:] = L_w[i,:] / np.linalg.norm(L_w[i,:])
+            n[i,:] = np.divide(L_w[i,:], np.linalg.norm(L_w[i,:]))
             w = np.cross(self.p_p[i,:], n[i,:])
             p[i,:] = np.matmul(wRp, w)
         
         J1_inv = np.column_stack((n, p))
-        L_w_dot = np.matmul(np.matmul(J1_inv, self.J2_inv), Q_dot)
 
-        Theta_dot = L_w_dot / (M * np.cos(Theta) - N * np.sin(Theta))
+        #angular velocities
+        omega = np.asarray([[0, cpsi, spsi * stheta],
+                [0, spsi, -cpsi * stheta],
+                [1, 0, ctheta]])    
+
+        J2_inv[3:6, 3:6] = omega
+
+        L_w_dot = np.matmul(np.matmul(J1_inv, J2_inv), Q_dot)
+
+        for i in range(6):
+            Theta_dot[i] = L_w_dot[i] / (M[i] * np.cos(Theta[i]) - N[i] * np.sin(Theta[i]))
 
         #publish
         servo_velocities = ServoAngles6DoFStamped()
@@ -143,6 +153,6 @@ class InverseDynamics:
         self.pub_servo_velocities.publish(servo_velocities)
 
 if __name__ == '__main__': #initialise node and run loop
-    rospy.init_node('inverse_dynamics')
+    rospy.init_node('inverse_velocity_kinematics')
     id = InverseDynamics()
     rospy.spin()
