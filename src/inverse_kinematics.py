@@ -62,19 +62,6 @@ class InverseKinematics:
 
         #init tf broadcaster
         self.br = tf2_ros.TransformBroadcaster()
-
-        # #send initial pose setpoint so arm doesn't sag after being turned on
-        # servo_angles_init = ServoAngles6DoFStamped()
-        # servo_angles_init.header.frame_id = "servo"
-        # servo_angles_init.header.stamp = rospy.Time.now()
-        # servo_angles_init.Theta1 = 0.0
-        # servo_angles_init.Theta2 = 0.0
-        # servo_angles_init.Theta3 = 0.0
-        # servo_angles_init.Theta4 = 0.0
-        # servo_angles_init.Theta5 = 0.0
-        # servo_angles_init.Theta6 = 0.0
-        # rospy.wait_for_message('/mavros/local_position/pose', PoseStamped)
-        # self.pub_servo_angles.publish(servo_angles_init)
         
 
     def callback(self, platform_state): #callback calculates servo angles
@@ -135,28 +122,26 @@ class InverseKinematics:
             else:
                 Theta[i] = np.arcsin(disc) - np.arctan(N / M)
 
-        # if not np.any(np.isnan(Theta)):
-        #     #ensure robot wont turn itself inside out (angle between distal linkage and platform cannot exceed 180degrees)
-        #     c30 = np.cos(np.deg2rad(30))
-        #     s30 = np.sin(np.deg2rad(30))
-        #     sTheta = np.sin(Theta)
-        #     cTheta = np.cos(Theta)
-        #     a_w = np.asarray([[self.ra * c30 * cTheta[0], self.ra * s30 * cTheta[0], self.ra * sTheta[0]],
-        #             [self.ra * c30 * cTheta[1], self.ra * s30 * cTheta[1], self.ra * sTheta[1]],
-        #             [-self.ra * c30 * cTheta[2], self.ra * s30 * cTheta[2], self.ra * sTheta[2]],
-        #             [-self.ra * c30 * cTheta[3], self.ra * s30 * cTheta[3], self.ra * sTheta[3]],
-        #             [0, -self.ra * cTheta[4], self.ra * sTheta[4]],
-        #             [0, -self.ra * cTheta[5], self.ra * sTheta[5]]])
+        if not np.any(np.isnan(Theta)):
+            #ensure robot wont turn itself inside out (angle between distal linkage and platform cannot exceed 180degrees)
+            c30 = np.cos(np.deg2rad(30))
+            s30 = np.sin(np.deg2rad(30))
+            sTheta = np.sin(Theta)
+            cTheta = np.cos(Theta)
+            a_w = np.asarray([[self.ra * c30 * cTheta[0], self.ra * s30 * cTheta[0], self.ra * sTheta[0]],
+                    [self.ra * c30 * cTheta[1], self.ra * s30 * cTheta[1], self.ra * sTheta[1]],
+                    [-self.ra * c30 * cTheta[2], self.ra * s30 * cTheta[2], self.ra * sTheta[2]],
+                    [-self.ra * c30 * cTheta[3], self.ra * s30 * cTheta[3], self.ra * sTheta[3]],
+                    [0, -self.ra * cTheta[4], self.ra * sTheta[4]],
+                    [0, -self.ra * cTheta[5], self.ra * sTheta[5]]])
 
-        #     #distal linkage vector
-        #     l_w = p_w - a_w
-
-        #     for i in range(6):
-        #         angle[i] = np.arccos(np.dot(p_w[i,:],l_w[i,:]) / (np.linalg.norm(p_w[i,:]) * np.linalg.norm(l_w[i,:])))
-        #         if angle[i] > np.pi:
-        #             Theta[i] = np.nan
-
-        #     print(angle)
+            n = np.matmul(wRp, np.asarray([0, 0, 1]))
+            
+            for i in range(6):
+                z = - (n[0] * (a_w[i,0] - X[0]) + n[1] * (a_w[i,1] - X[1])) / n[2] + X[2]
+                for j in range(6):
+                    if a_w[j,2] + 0.01 > z:
+                        Theta[i] = np.nan
 
 
         #publish if all servo angles have been solved

@@ -15,7 +15,6 @@ cd ~/catkin_ws/src
 git clone https://github.com/lachie-aerialrobotics/delta_2.git
 catkin build
 ```
-
 To test in gazebo, first update any changes to the .sdf:
 ```
 cd gazebo/models/stewart_platform
@@ -29,9 +28,13 @@ cd build
 cmake ..
 make
 ```
-
+Install groundtruth plugin dependecy:
+```
+sudo apt install ros-noetic-gazebo-plugins
+```
 Then run the simulation:
 ```
 roslaunch delta_2 manipulator_sim.launch
 ```
+Use `rqt` to send setpoints to the manipulator
 
