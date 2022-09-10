@@ -11,4 +11,7 @@
   <group if="$(arg sim)">
     <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
   </group>
+  <group unless="$(arg sim)">
+    <include file="$(find delta_2)/launch/servo_comms.launch"/>
+  </group>
 </launch>
