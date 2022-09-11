@@ -3,7 +3,7 @@ import rospy
 import numpy as np
 import tf2_ros
 from geometry_msgs.msg import PoseStamped, TransformStamped
-from delta_2.msg import ServoAngles6DoFStamped
+from delta_2.msg import ServoAnglesStamped
 from tf.transformations import euler_from_quaternion
 from mavros_msgs.msg import State
 
@@ -57,7 +57,7 @@ class InverseKinematics:
         br_static.sendTransform(tf_workspace)
 
         #init publisher and subscriber
-        self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAngles6DoFStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
+        self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
         self.sub_platform_state = rospy.Subscriber('/platform_setpoint/pose', PoseStamped, self.callback, tcp_nodelay=True) #target pose subscriber
 
         #init tf broadcaster
@@ -146,15 +146,11 @@ class InverseKinematics:
 
         #publish if all servo angles have been solved
         if not np.any(np.isnan(Theta)):
-            servo_angles = ServoAngles6DoFStamped()
+            servo_angles = ServoAnglesStamped()
             servo_angles.header.frame_id = "servo"
             servo_angles.header.stamp = platform_state.header.stamp
-            servo_angles.Theta1 = np.rad2deg(Theta[0])
-            servo_angles.Theta2 = np.rad2deg(Theta[1])
-            servo_angles.Theta3 = np.rad2deg(Theta[2])
-            servo_angles.Theta4 = np.rad2deg(Theta[3])
-            servo_angles.Theta5 = np.rad2deg(Theta[4])
-            servo_angles.Theta6 = np.rad2deg(Theta[5])
+            for i in range(6):
+                servo_angles.Theta.append(np.rad2deg(Theta[i]))
             self.pub_servo_angles.publish(servo_angles)
 
             #broadcast transform

@@ -2,7 +2,7 @@
 import rospy
 import numpy as np
 from geometry_msgs.msg import TwistStamped, PoseStamped
-from delta_2.msg import ServoAngles6DoFStamped
+from delta_2.msg import ServoAnglesStamped
 from tf.transformations import euler_from_quaternion
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 
@@ -43,10 +43,10 @@ class InverseDynamics:
             [sb, -rb, 0]])
 
         #init publisher and subscriber
-        self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAngles6DoFStamped, queue_size=1) #servo velocity publisher
+        self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAnglesStamped, queue_size=1) #servo velocity publisher
         sub_platform_vel = Subscriber('/platform_setpoint/velocity', TwistStamped) #target twist subscriber
         sub_platform_pose = Subscriber('/platform_setpoint/pose', PoseStamped) #target pose subscriber
-        sub_servo_angles = Subscriber('/servo_setpoint/positions', ServoAngles6DoFStamped) #servo angle subscriber
+        sub_servo_angles = Subscriber('/servo_setpoint/positions', ServoAnglesStamped) #servo angle subscriber
 
         ts = ApproximateTimeSynchronizer([sub_platform_vel, sub_platform_pose, sub_servo_angles], queue_size=1, slop=0.05)
         ts.registerCallback(self.vel_callback)
@@ -64,12 +64,12 @@ class InverseDynamics:
         N = np.zeros(6)
 
         #put calculated servo angles in array
-        Theta = np.asarray([np.deg2rad(servo_angles.Theta1), 
-                                np.deg2rad(servo_angles.Theta2),
-                                np.deg2rad(servo_angles.Theta3), 
-                                np.deg2rad(servo_angles.Theta4), 
-                                np.deg2rad(servo_angles.Theta5), 
-                                np.deg2rad(servo_angles.Theta6)])
+        Theta = np.asarray([np.deg2rad(servo_angles.Theta[0]), 
+                                np.deg2rad(servo_angles.Theta[1]),
+                                np.deg2rad(servo_angles.Theta[2]), 
+                                np.deg2rad(servo_angles.Theta[3]), 
+                                np.deg2rad(servo_angles.Theta[4]), 
+                                np.deg2rad(servo_angles.Theta[5])])
 
         #get Euler angles from quaternion
         (psi, theta, phi) = euler_from_quaternion([platform_pose.pose.orientation.x, 
@@ -141,15 +141,11 @@ class InverseDynamics:
             Theta_dot[i] = L_w_dot[i] / (M[i] * np.cos(Theta[i]) - N[i] * np.sin(Theta[i]))
 
         #publish
-        servo_velocities = ServoAngles6DoFStamped()
+        servo_velocities = ServoAnglesStamped()
         servo_velocities.header.frame_id = "servo"
         servo_velocities.header.stamp = platform_pose.header.stamp
-        servo_velocities.Theta1 = np.rad2deg(Theta_dot[0])
-        servo_velocities.Theta2 = np.rad2deg(Theta_dot[1])
-        servo_velocities.Theta3 = np.rad2deg(Theta_dot[2])
-        servo_velocities.Theta4 = np.rad2deg(Theta_dot[3])
-        servo_velocities.Theta5 = np.rad2deg(Theta_dot[4])
-        servo_velocities.Theta6 = np.rad2deg(Theta_dot[5])
+        for i in range(6):
+            servo_velocities.Theta.append(np.rad2deg(Theta_dot[i]))
         self.pub_servo_velocities.publish(servo_velocities)
 
 if __name__ == '__main__': #initialise node and run loop

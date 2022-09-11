@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <launch>
-    <!-- <param name="model_name" value="stewart_platform"/>
-    <include file="$(find delta_2)/launch/spawn_stewart_model.launch" /> -->
+    <param name="model_name" value="stewart_platform"/>
+    <include file="$(find delta_2)/launch/spawn_stewart_model.launch" />
     <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
     <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
     <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
     <node name="InverseDynamics" pkg="delta_2" type="inverse_velocity_kinematics.py" required="true" output="screen"/>
-    <!-- <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/> -->
-
-    <node name="ServoController" pkg="delta_2" type="servo_pos_controller.py" required="true" output="screen"/>
-
-
-    <!-- <include file="$(find delta_2)/launch/servo_comms.launch"/> -->
+    <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
 </launch>

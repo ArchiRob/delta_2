@@ -56,6 +56,7 @@ dynamic_reconfigure
 add_message_files(
   FILES
   ServoAngles6DoFStamped.msg
+  ServoAnglesStamped.msg
 )
 
 ## Generate services in the 'srv' folder
