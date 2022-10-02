@@ -5,6 +5,6 @@
     <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
     <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
     <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
-    <node name="InverseDynamics" pkg="delta_2" type="inverse_velocity_kinematics.py" required="true" output="screen"/>
+    <!-- <node name="InverseDynamics" pkg="delta_2" type="inverse_velocity_kinematics.py" required="true" output="screen"/> -->
     <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
 </launch>
