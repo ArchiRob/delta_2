@@ -74,6 +74,20 @@ class InverseKinematics:
         tf_workspace.transform.rotation = platform_pos_init.pose.orientation
         br_static.sendTransform(tf_workspace)
 
+        pos_retracted = rospy.get_param('/retracted_position')
+
+        #broadcast retracted position (roughly) as a static tf#
+        self.br = tf2_ros.TransformBroadcaster()
+        tf_retracted = TransformStamped()
+        tf_retracted.header.frame_id = "stewart_base"
+        tf_retracted.header.stamp = rospy.Time.now()
+        tf_retracted.child_frame_id = "platform"
+        tf_retracted.transform.translation.x = pos_retracted[0]
+        tf_retracted.transform.translation.y = pos_retracted[1]
+        tf_retracted.transform.translation.z = pos_retracted[2]
+        tf_retracted.transform.rotation = platform_pos_init.pose.orientation
+        self.br.sendTransform(tf_retracted)
+
         #init publishers and subscribers
         #position kinematics
         self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
@@ -86,7 +100,7 @@ class InverseKinematics:
         sub_platform_vel = rospy.Subscriber('/platform_setpoint/accel', Vector3Stamped, self.accel_callback, tcp_nodelay=True) #target accel subscriber
 
         #init tf broadcaster
-        self.br = tf2_ros.TransformBroadcaster()
+        
         
 
     def pos_callback(self, platform_pos): #callback calculates servo angles
