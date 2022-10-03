@@ -1,8 +1,9 @@
 #!/usr/bin/env python
+from turtle import home
 import rospy
 import numpy as np
 import tf2_ros
-from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, Vector3Stamped
+from geometry_msgs.msg import PoseStamped, TransformStamped, TwistStamped, AccelStamped
 from delta_2.msg import ServoAnglesStamped
 from tf.transformations import euler_from_quaternion
 from mavros_msgs.msg import State
@@ -17,6 +18,11 @@ class InverseKinematics:
         sp = rospy.get_param('/platform_joint_spacing')
         self.ra = rospy.get_param('/proximal_link_length')
         self.rs = rospy.get_param('/distal_link_length')
+
+        pos_retracted = rospy.get_param('/retracted_position')
+        home_offset = rospy.get_param('/home_offset')
+        self.translation_limit = rospy.get_param('/translation_limit')
+        self.rotation_limit = rospy.get_param('/rotation_limit')
 
         #angles of servo motors about centre of base
         self.beta = np.asarray([np.deg2rad(30), np.deg2rad(30), np.deg2rad(150), np.deg2rad(150), np.deg2rad(270), np.deg2rad(270)])
@@ -51,13 +57,15 @@ class InverseKinematics:
 
         #kinematics for initial platform pose
         platform_pos_init = PoseStamped()
-        platform_pos_init.pose.position.x = 0.0
-        platform_pos_init.pose.position.y = 0.0
-        platform_pos_init.pose.position.z = np.sqrt(self.rs**2 - (rb + self.ra - rp)**2)
+        platform_pos_init.pose.position.x = home_offset[0]
+        platform_pos_init.pose.position.y = home_offset[1]
+        platform_pos_init.pose.position.z = np.sqrt(self.rs**2 - (rb + self.ra - rp)**2) + home_offset[2]
         platform_pos_init.pose.orientation.x = 0.0
         platform_pos_init.pose.orientation.y = 0.0
         platform_pos_init.pose.orientation.z = 0.0
         platform_pos_init.pose.orientation.w = 1.0
+
+        self.home_pos_z = platform_pos_init.pose.position.z
 
         #generate initial values
         self.nopub = True
@@ -73,8 +81,6 @@ class InverseKinematics:
         tf_workspace.transform.translation = platform_pos_init.pose.position
         tf_workspace.transform.rotation = platform_pos_init.pose.orientation
         br_static.sendTransform(tf_workspace)
-
-        pos_retracted = rospy.get_param('/retracted_position')
 
         #broadcast retracted position (roughly) as a static tf#
         self.br = tf2_ros.TransformBroadcaster()
@@ -97,9 +103,7 @@ class InverseKinematics:
         sub_platform_vel = rospy.Subscriber('/platform_setpoint/velocity', TwistStamped, self.vel_callback, tcp_nodelay=True) #target twist subscriber
         #acceleration kinematics
         self.pub_servo_accels = rospy.Publisher('/servo_setpoint/accels', ServoAnglesStamped, queue_size=1) #servo accel publisher
-        sub_platform_vel = rospy.Subscriber('/platform_setpoint/accel', Vector3Stamped, self.accel_callback, tcp_nodelay=True) #target accel subscriber
-
-        #init tf broadcaster
+        sub_platform_vel = rospy.Subscriber('/platform_setpoint/accel', AccelStamped, self.accel_callback, tcp_nodelay=True) #target accel subscriber
         
         
 
@@ -110,10 +114,11 @@ class InverseKinematics:
                         platform_pos.pose.position.z])
 
         #get Euler angles from quaternion
-        (self.psi, self.theta, self.phi) = euler_from_quaternion([platform_pos.pose.orientation.x, 
+        (self.theta, self.phi, self.psi) = euler_from_quaternion([platform_pos.pose.orientation.x, 
                                                     platform_pos.pose.orientation.y, 
                                                     platform_pos.pose.orientation.z, 
                                                     platform_pos.pose.orientation.w])
+
 
         #initialise empty numpy arrays
         p_w = np.zeros((6,3))
@@ -182,7 +187,11 @@ class InverseKinematics:
 
 
         #publish if all servo angles have been solved
-        if not (np.any(np.isnan(self.Theta))):
+        if np.any(np.isnan(self.Theta)):
+            rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS MATHEMATICAL WORKSPACE")
+        elif np.any(np.abs([X[0], X[1], X[2]-self.home_pos_z]) > self.translation_limit) or np.any(np.abs([self.psi, self.theta, self.phi]) > np.deg2rad(self.rotation_limit)):
+            rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS DEFINED WORKSPACE")
+        else:
             self.servo_angles = ServoAnglesStamped()
             self.servo_angles.header.frame_id = "servo"
             self.servo_angles.header.stamp = platform_pos.header.stamp
@@ -199,9 +208,7 @@ class InverseKinematics:
             t.transform.translation = platform_pos.pose.position
             t.transform.rotation = platform_pos.pose.orientation
             if not self.nopub:
-                self.br.sendTransform(t)
-        else:
-            rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS WORKSPACE")
+                self.br.sendTransform(t)         
 
     def vel_callback(self, platform_vel):
         #initialise empty numpy arrays
@@ -220,7 +227,7 @@ class InverseKinematics:
         #assign velocities to vector q_dot
         #angular velocities are assigned in a weird order to represent a frame rotation of -pi/2 about the x axis. This allows us to avoid a singularity.
         Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
-                            platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
+                            platform_vel.twist.angular.z, platform_vel.twist.angular.x, platform_vel.twist.angular.y])
         
         for i in range(6):
             #this is the new stuff to calculate velocities

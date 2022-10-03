@@ -34,8 +34,8 @@ namespace gazebo
             m_model = _model;
             m_joints = m_model->GetJoints();
 
-            common::PID pid_pos(0.5, 0.1, 0.0); //placeholder values, need to do an input parameter for this
-            common::PID pid_vel(0.03, 0.01, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_pos(0.3, 0.06, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_vel(0.01, 0.005, 0.0); //placeholder values, need to do an input parameter for this
 
             for (const auto& joint: m_joints)
                 m_model->GetJointController()->SetPositionPID(joint->GetScopedName(), pid_pos);

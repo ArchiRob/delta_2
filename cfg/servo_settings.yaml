@@ -4,4 +4,3 @@ servo:
   port: /dev/ttyUSB0
   baud: 4000000
   num:  6
-  retracted_angle: 1000

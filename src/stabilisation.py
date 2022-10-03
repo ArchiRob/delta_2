@@ -3,8 +3,8 @@ import rospy
 import numpy as np
 import tf2_ros
 
-from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Vector3
-from tf.transformations import quaternion_multiply, quaternion_conjugate
+from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Vector3, AccelStamped
+from tf.transformations import quaternion_multiply, quaternion_conjugate, euler_from_quaternion, quaternion_from_euler
 from tf2_geometry_msgs import do_transform_vector3
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from mavros_msgs.msg import State
@@ -26,7 +26,7 @@ class Stabilisation:
         #init publishers and subscribers
         self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         self.pub_platform_twist = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
-        self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', Vector3Stamped, queue_size=1, tcp_nodelay=True)
+        self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
         
         sub_drone_state = rospy.Subscriber('/mavros/state', State, self.state_callback, tcp_nodelay=True) #target pose subscriber
         sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
@@ -50,7 +50,7 @@ class Stabilisation:
             elif state.mode == "POSCTL":
                 self.manip_mode = "STAB_3DOF"
             else:
-                self.manip_mode = "RETRACTED"
+                self.manip_mode = "HOME"
         else:
             self.manip_mode = "RETRACTED"
 
@@ -69,38 +69,47 @@ class Stabilisation:
         self.Omega_sp = np.asarray([sub_tooltip_twist.twist.angular.x, sub_tooltip_twist.twist.angular.y, sub_tooltip_twist.twist.angular.z])
 
     def drone_pose_callback(self, sub_drone_pose):
-        w_tf_b = self.tfBuffer.lookup_transform('map', 'stewart_base', time=sub_drone_pose.header.stamp, timeout=rospy.Duration(0.01))
-        w_q_b = np.asarray([w_tf_b.transform.rotation.x, w_tf_b.transform.rotation.y, w_tf_b.transform.rotation.z, w_tf_b.transform.rotation.w])
+        #initialise position vectors and rotation quaternions
+        #tooltip setpoint position in world frame
+        OT_w = self.X_sp_w
+        #rotation of tooltip/platform in world frame
+        w_q_p = self.Q_sp_w
+         #measured drone base_link position in world frame
+        OD_w = np.asarray([sub_drone_pose.pose.position.x, sub_drone_pose.pose.position.y, sub_drone_pose.pose.position.z])
+        
+        PT_p = np.asarray([self.p_tf_t.transform.translation.x, self.p_tf_t.transform.translation.y, self.p_tf_t.transform.translation.z]) 
 
-        # WB_w = Vector3Stamped(sub_drone_pose.header, Vector3(w_tf_b.transform.translation.x, w_tf_b.transform.translation.y, w_tf_b.transform.translation.z))
-        WB_w = np.asarray([w_tf_b.transform.translation.x, w_tf_b.transform.translation.y, w_tf_b.transform.translation.z])
+        DB_d = np.asarray([self.d_tf_b.transform.translation.x, self.d_tf_b.transform.translation.y, self.d_tf_b.transform.translation.z])
 
-        # platform to tooltip in platform frame
-        PT_p = np.asarray([self.p_tf_t.transform.translation.x, self.p_tf_t.transform.translation.y, self.p_tf_t.transform.translation.z])
+        #measured drone base_link orientation in world frame
+        w_q_d = np.asarray([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
+        d_q_b = np.asarray([self.d_tf_b.transform.rotation.x, self.d_tf_b.transform.rotation.y, self.d_tf_b.transform.rotation.z, self.d_tf_b.transform.rotation.w])
+        b_q_d = quaternion_conjugate(d_q_b)
+        p_q_w = quaternion_conjugate(w_q_p)
+        
+        d_q_w = quaternion_conjugate(w_q_d)
+        # can definitely make this line more efficient but it works :p
+        b_q_p = quaternion_multiply(quaternion_multiply(w_q_p, quaternion_multiply(b_q_d, d_q_w)), d_q_b)
+        
+        BT_d = -DB_d + quaternion_rotation(OT_w - OD_w, d_q_w)
+        BP_b = quaternion_rotation(BT_d, b_q_d) - quaternion_rotation(PT_p, b_q_p)
 
-        # tooltip rotation in base frame
-        Q_b = quaternion_multiply(self.Q_sp_w , w_q_b)
-
-        # tooltip vector in base frame
-        PT_b = quaternion_rotation(PT_p, Q_b)
-
-        #target vector in base frame
-        WT_b = quaternion_rotation(self.X_sp_w, w_q_b)
-
-        #base vector in base frame
-        WB_b = quaternion_rotation(WB_w, w_q_b)
-
-        BP_b = -WB_b + WT_b - PT_b
-
+        drone_angles = euler_from_quaternion([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
+        yaw = quaternion_from_euler(0,drone_angles[2], 0)
+    
+        DB_b = quaternion_rotation(DB_d, b_q_d)
         if self.manip_mode == "RETRACTED":
             self.X = self.retracted_pos
+            self.Q = np.asarray([0, 0, 0, 1])        
+        elif self.manip_mode =="HOME":
+            self.X = self.home_pos
             self.Q = np.asarray([0, 0, 0, 1])
         elif self.manip_mode == "STAB_3DOF":
-            self.X = self.home_pos
-            self.Q = Q_b
+            self.X = quaternion_rotation(self.home_pos + DB_b, quaternion_multiply(b_q_p, yaw)) - DB_b
+            self.Q = quaternion_multiply(b_q_p, yaw)
         elif self.manip_mode == "STAB_6DOF":
             self.X = BP_b
-            self.Q = Q_b
+            self.Q = b_q_p
     
         #fill in pose msg and publish
         platform_pose = PoseStamped()
@@ -116,39 +125,56 @@ class Stabilisation:
         self.pub_platform_pose.publish(platform_pose)
 
     def drone_twist_callback(self, sub_drone_twist):
-        V_drone_d = np.asarray([sub_drone_twist.twist.linear.x, sub_drone_twist.twist.linear.y, sub_drone_twist.twist.linear.z])
-        Omega_drone_d = np.asarray([sub_drone_twist.twist.angular.x, sub_drone_twist.twist.angular.y, sub_drone_twist.twist.angular.z])
+        V_drone_d = Vector3Stamped(sub_drone_twist.header, Vector3(sub_drone_twist.twist.linear.x, sub_drone_twist.twist.linear.y, sub_drone_twist.twist.linear.z))
+        Omega_drone_d = Vector3Stamped(sub_drone_twist.header, Vector3(sub_drone_twist.twist.angular.x, sub_drone_twist.twist.angular.y, sub_drone_twist.twist.angular.z))
+        
+        d_tf_b = self.tfBuffer.lookup_transform('stewart_base', 'base_link', time=sub_drone_twist.header.stamp, timeout=rospy.Duration(0.01))
+        V_drone_b = do_transform_vector3(V_drone_d, d_tf_b)
+        Omega_drone_b = do_transform_vector3(Omega_drone_d, d_tf_b)
 
-        d_tf_t = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=sub_drone_twist.header.stamp, timeout=rospy.Duration(0.01))
-        d_tf_b = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=sub_drone_twist.header.stamp, timeout=rospy.Duration(0.01))
+        d_tf_t = self.tfBuffer.lookup_transform('base_link', 'tooltip', time=sub_drone_twist.header.stamp, timeout=rospy.Duration(0.01))
 
-        DT_d = np.asarray([d_tf_t.transform.translation.x, d_tf_t.transform.translation.y, d_tf_t.transform.translation.z])
+        DT_d = Vector3Stamped(sub_drone_twist.header, Vector3(d_tf_t.transform.translation.x, d_tf_t.transform.translation.y, d_tf_t.transform.translation.z))
+        DT_b = do_transform_vector3(DT_d, d_tf_b)
 
-        V_tip_d = -(V_drone_d + np.cross(Omega_drone_d, DT_d)) + self.V_sp
+        V_drone_b = np.asarray([V_drone_b.vector.x, V_drone_b.vector.y, V_drone_b.vector.z])
+        Omega_drone_b = np.asarray([Omega_drone_b.vector.x, Omega_drone_b.vector.y, Omega_drone_b.vector.z])
+        DT_b = np.asarray([DT_b.vector.x, DT_b.vector.y, DT_b.vector.z])
 
-        Omega_tip_d = -Omega_drone_d + self.Omega_sp
+        V_sp_d = Vector3Stamped(sub_drone_twist.header, Vector3(self.V_sp[0], self.V_sp[1], self.V_sp[2])) 
+        V_sp_b = do_transform_vector3(V_sp_d, d_tf_b)
+        V_sp_b = np.asarray([V_sp_b.vector.x, V_sp_b.vector.y, V_sp_b.vector.z])
 
-        V_tip_d = Vector3Stamped(sub_drone_twist.header, Vector3(V_tip_d[0], V_tip_d[1], V_tip_d[2]))
-        Omega_tip_d = Vector3Stamped(sub_drone_twist.header, Vector3(Omega_tip_d[0], Omega_tip_d[1], Omega_tip_d[2]))
+        Omega_sp_d = Vector3Stamped(sub_drone_twist.header, Vector3(self.Omega_sp[0], self.Omega_sp[1], self.Omega_sp[2])) 
+        Omega_sp_b = do_transform_vector3(Omega_sp_d, d_tf_b)
+        Omega_sp_b = np.asarray([Omega_sp_b.vector.x, Omega_sp_b.vector.y, Omega_sp_b.vector.z])
 
-        V_tip_p = do_transform_vector3(V_tip_d, d_tf_b)
-        Omega_tip_p = do_transform_vector3(Omega_tip_d, d_tf_b)
+        V_tip_b = V_drone_b + np.cross(Omega_drone_b, DT_b)
+
+        Omega_tip_b = Omega_drone_b
 
         if self.manip_mode == "RETRACTED":
-            X_dot = Vector3(0.0, 0.0, 0.0)
-            Omega = Vector3(0.0, 0.0, 0.0)
+            X_dot = np.asarray([0.0, 0.0, 0.0])
+            Omega = np.asarray([0.0, 0.0, 0.0])
+        elif self.manip_mode =="HOME":
+            X_dot = np.asarray([0.0, 0.0, 0.0])
+            Omega = np.asarray([0.0, 0.0, 0.0])
         elif self.manip_mode == "STAB_3DOF":
-            X_dot = Vector3(0.0, 0.0, 0.0)
-            Omega = Omega_tip_p.vector
+            X_dot = -V_tip_b
+            Omega = -Omega_tip_b
         elif self.manip_mode == "STAB_6DOF":
-            X_dot = V_tip_p.vector
-            Omega = Omega_tip_p.vector
+            X_dot = -V_tip_b + V_sp_b
+            Omega = -Omega_drone_b + Omega_sp_b
          
         platform_twist = TwistStamped()
         platform_twist.header.frame_id = 'stewart_base'
         platform_twist.header.stamp = sub_drone_twist.header.stamp
-        platform_twist.twist.linear = X_dot
-        platform_twist.twist.angular = Omega
+        platform_twist.twist.linear.x = X_dot[0]
+        platform_twist.twist.linear.y = X_dot[1]
+        platform_twist.twist.linear.z = X_dot[2]
+        platform_twist.twist.angular.x = Omega[0]
+        platform_twist.twist.angular.y = Omega[1]
+        platform_twist.twist.angular.z = Omega[2]
         self.pub_platform_twist.publish(platform_twist)
 
 
@@ -158,15 +184,17 @@ class Stabilisation:
 
         if self.manip_mode == "RETRACTED":
             X_ddot = Vector3(0.0, 0.0, 0.0)
+        elif self.manip_mode == "HOME":
+            X_ddor = Vector3(0.0, 0.0, 0.0)
         elif self.manip_mode == "STAB_3DOF":
-            X_ddot = Vector3(0.0, 0.0, 0.0)
+            X_ddot = A_b.vector
         elif self.manip_mode == "STAB_6DOF":
-            X_ddot = A_b
+            X_ddot = A_b.vector
 
-        platform_accel = Vector3Stamped()
+        platform_accel = AccelStamped()
         platform_accel.header.frame_id = 'stewart_base'
         platform_accel.header.stamp = sub_drone_accel.header.stamp
-        platform_accel.vector = X_ddot
+        platform_accel.accel.linear = X_ddot
         self.pub_platform_accel.publish(platform_accel)
         
 
