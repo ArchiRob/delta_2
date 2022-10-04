@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <!-- Launch file for running the delta-arm only -->
 <launch>
-  <arg name="sim" default="true"/>
+  <arg name="sim" default="false"/>
 
   <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
   <rosparam file="$(find delta_2)/cfg/servo_settings.yaml" />
@@ -10,9 +10,8 @@
 
   <group if="$(arg sim)">
     <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
-    <node name="ServoController" pkg="delta_2" type="servo_controller.py" required="true" output="screen"/>
   </group>
   <group unless="$(arg sim)">
-    <include file="$(find delta_2)/launch/servo_comms.launch"/>
+    <node name="ServoController" pkg="delta_2" type="servo_controller.py" required="true" output="screen"/>
   </group>
 </launch>

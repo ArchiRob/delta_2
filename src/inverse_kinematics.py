@@ -213,7 +213,7 @@ class InverseKinematics:
 
     def vel_callback(self, platform_vel):
         self.Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
-                    platform_vel.twist.angular.z, platform_vel.twist.angular.x, platform_vel.twist.angular.y])
+                    platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
 
         self.stamp = platform_vel.header.stamp 
 
