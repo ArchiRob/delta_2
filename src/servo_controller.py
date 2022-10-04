@@ -74,8 +74,8 @@ class ServoController:
         self.pos_pub = rospy.Publisher('/servo_detected/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) # servo angle publisher
 
         servo_pos_sub = rospy.Subscriber('/servo_setpoint/positions', ServoAnglesStamped, self.pos_sp_callback, tcp_nodelay=True) #target pose subscriber
-        servo_vel_sub = rospy.Subscriber('/servo_setpoint/velocities', ServoAnglesStamped, self.vel_sp_callback, tcp_nodelay=True) 
-        servo_acc_sub = rospy.Subscriber('/servo_setpoint/accels', ServoAnglesStamped, self.acc_sp_callback, tcp_nodelay=True)
+        # servo_vel_sub = rospy.Subscriber('/servo_setpoint/velocities', ServoAnglesStamped, self.vel_sp_callback, tcp_nodelay=True) 
+        # servo_acc_sub = rospy.Subscriber('/servo_setpoint/accels', ServoAnglesStamped, self.acc_sp_callback, tcp_nodelay=True)
 
         self.POS_CMD = np.asarray([0, 0, 0, 0, 0, 0])
         # self.DXL_POS_SP = np.asarray([0, 0, 0, 0, 0, 0])
@@ -186,34 +186,34 @@ class ServoController:
 
         self.POS_CMD = DXL_POS_SP
 
-    def vel_sp_callback(self, vel_sub):
-        DXL_VEL_SP = []
+    # def vel_sp_callback(self, vel_sub):
+    #     DXL_VEL_SP = []
 
-        self.DXL_VEL_STAMP = vel_sub.header.stamp
+    #     self.DXL_VEL_STAMP = vel_sub.header.stamp
 
-        for i in range(NUM_SERVOS):
-            DXL_VEL_SP.append(vel_sub.Theta[i])
+    #     for i in range(NUM_SERVOS):
+    #         DXL_VEL_SP.append(vel_sub.Theta[i])
 
-        t = self.DXL_VEL_STAMP - self.DXL_POS_STAMP
-        t = t.to_sec()
+    #     t = self.DXL_VEL_STAMP - self.DXL_POS_STAMP
+    #     t = t.to_sec()
 
-        self.POS_CMD += DXL_VEL_SP * t
-        self.VEL_CMD = DXL_VEL_SP
+    #     self.POS_CMD += DXL_VEL_SP * t
+    #     self.VEL_CMD = DXL_VEL_SP
 
-    def acc_sp_callback(self, acc_sub):
-        DXL_ACC_SP = []
+    # def acc_sp_callback(self, acc_sub):
+    #     DXL_ACC_SP = []
 
-        self.DXL_ACC_STAMP = acc_sub.header.stamp
+    #     self.DXL_ACC_STAMP = acc_sub.header.stamp
 
-        for i in range(NUM_SERVOS):
-            DXL_ACC_SP.append(acc_sub.Theta[i])
+    #     for i in range(NUM_SERVOS):
+    #         DXL_ACC_SP.append(acc_sub.Theta[i])
 
-        t = self.DXL_ACC_STAMP - self.DXL_VEL_STAMP
-        t = t.to_sec()
+    #     t = self.DXL_ACC_STAMP - self.DXL_VEL_STAMP
+    #     t = t.to_sec()
         
-        self.POS_CMD += 0.5 * DXL_ACC_SP * t**2
-        self.VEL_CMD += DXL_ACC_SP * t
-        self.ACC_CMD = DXL_ACC_SP
+    #     self.POS_CMD += 0.5 * DXL_ACC_SP * t**2
+    #     self.VEL_CMD += DXL_ACC_SP * t
+    #     self.ACC_CMD = DXL_ACC_SP
 
 def bits2deg(bits):
     deg = float(bits - 2048) * 0.0878906

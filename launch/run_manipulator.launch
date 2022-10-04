@@ -4,6 +4,7 @@
   <arg name="sim" default="true"/>
 
   <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
+  <rosparam file="$(find delta_2)/cfg/servo_settings.yaml" />
 
   <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
 

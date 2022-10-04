@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
+        - /TF1/Frames1
         - /Pose1
         - /TwistStamped1
         - /AccelStamped1
@@ -58,25 +60,25 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         base_link:
           Value: true
         base_link_frd:
-          Value: true
+          Value: false
         body:
-          Value: true
+          Value: false
         camera_init:
-          Value: true
+          Value: false
         map:
           Value: true
         map_ned:
-          Value: true
+          Value: false
         odom:
-          Value: true
+          Value: false
         odom_ned:
-          Value: true
+          Value: false
         os_sensor:
-          Value: true
+          Value: false
         platform:
           Value: true
         stewart_base:
@@ -215,7 +217,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 5.8305182456970215
+      Distance: 10.15994644165039
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -223,17 +225,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.10657806694507599
-        Y: 0.6780158281326294
-        Z: 0.5517580509185791
+        X: 0.36536991596221924
+        Y: 0.16478705406188965
+        Z: -0.08885783702135086
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8147972822189331
+      Pitch: 0.6597974300384521
       Target Frame: <Fixed Frame>
-      Yaw: 5.643592357635498
+      Yaw: 4.623591423034668
     Saved: ~
 Window Geometry:
   Displays:

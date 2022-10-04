@@ -49,6 +49,7 @@ class Stabilisation:
         self.Omega_sp_d = np.asarray([0.0, 0.0, 0.0])
         self.X_sp_w = np.asarray([0.0, 0.0, 0.0])
         self.Q_sp_W = self.d_q_b
+        self.X = self.retracted_pos
 
     def state_callback(self, state):
         if state.armed:
@@ -76,15 +77,13 @@ class Stabilisation:
     def drone_pose_callback(self, sub_drone_pose):
         WD_w = np.asarray([sub_drone_pose.pose.position.x, sub_drone_pose.pose.position.y, sub_drone_pose.pose.position.z])
         w_q_d = np.asarray([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
-
-        WT_w = self.X_sp_w
-        w_q_p = self.Q_sp_w
-   
-        b_q_d = quaternion_conjugate(self.d_q_b)      
-        d_q_w = quaternion_conjugate(w_q_d)
-        b_q_p = quaternion_multiply(quaternion_multiply(w_q_p, quaternion_multiply(b_q_d, d_q_w)), self.d_q_b)    
-        BT_d = -self.DB_d + quaternion_rotation(WT_w - WD_w, d_q_w)   
-        DB_b = quaternion_rotation(self.DB_d, b_q_d)
+              
+        d_q_w = quaternion_conjugate(w_q_d) #rotation from drone frame to world frame      
+        b_q_d = quaternion_conjugate(self.d_q_b) #rotation from base frame to drone frame        
+        DB_w = quaternion_rotation(self.DB_d, w_q_d) #drone to base vector in world frame        
+        PT_w = quaternion_rotation(quaternion_rotation(self.PT_p, self.d_q_b), self.Q_sp_w) #platform to tooltip vector in world frame        
+        b_q_w = quaternion_multiply(b_q_d, d_q_w) #base to world rotation
+        b_q_p = quaternion_multiply(b_q_w, quaternion_multiply(self.Q_sp_w, self.d_q_b)) 
 
         if self.manip_mode == "RETRACTED":
             self.X = self.retracted_pos
@@ -93,11 +92,17 @@ class Stabilisation:
             self.X = self.home_pos
             self.Q = np.asarray([0, 0, 0, 1])
         elif self.manip_mode == "STAB_3DOF":
-            yaw = quaternion_from_euler(0, w_q_d[2], 0)
-            self.X = quaternion_rotation(self.home_pos + DB_b, quaternion_multiply(b_q_p, yaw)) - DB_b
+            drone_angles = euler_from_quaternion([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
+            yaw = quaternion_from_euler(0,drone_angles[2], 0)
+            DB_b = quaternion_rotation(self.DB_d, b_q_d)
+            BP_b = quaternion_rotation(self.home_pos + DB_b, quaternion_multiply(b_q_p, yaw)) - DB_b
+            self.X = BP_b 
             self.Q = quaternion_multiply(b_q_p, yaw)
-        elif self.manip_mode == "STAB_6DOF":          
-            self.X = quaternion_rotation(BT_d, b_q_d) - quaternion_rotation(self.PT_p, b_q_p)
+        elif self.manip_mode == "STAB_6DOF":   
+            BP_w = -DB_w - WD_w + self.X_sp_w - PT_w #base to platform vector in world frame
+          
+            BP_b = quaternion_rotation(BP_w, b_q_w) #base to platform vector in base frame       
+            self.X = BP_b
             self.Q = b_q_p
     
         #fill in pose msg and publish
@@ -156,17 +161,18 @@ class Stabilisation:
     def drone_accel_callback(self, sub_drone_accel):
         gravity = quaternion_rotation(np.asarray([0,0,9.805]), quaternion_conjugate(np.asarray([sub_drone_accel.orientation.x, sub_drone_accel.orientation.y, sub_drone_accel.orientation.z, sub_drone_accel.orientation.w])))
         A_d = np.asarray([sub_drone_accel.linear_acceleration.x, sub_drone_accel.linear_acceleration.y, sub_drone_accel.linear_acceleration.z]) - gravity
-    
-        A_b = quaternion_rotation(A_d, self.d_q_b)
+
+        b_q_d = quaternion_conjugate(self.d_q_b) #rotation from base frame to drone frame
+        A_b = quaternion_rotation(A_d, b_q_d)
         
         if self.manip_mode == "RETRACTED":
             X_ddot = np.asarray([0.0, 0.0, 0.0])
         elif self.manip_mode == "HOME":
             X_ddot = np.asarray([0.0, 0.0, 0.0])
         elif self.manip_mode == "STAB_3DOF":
-            X_ddot = A_b
+            X_ddot = -A_b
         elif self.manip_mode == "STAB_6DOF":
-            X_ddot = A_b
+            X_ddot = -A_b
 
         platform_accel = AccelStamped()
         platform_accel.header.frame_id = 'stewart_base'
