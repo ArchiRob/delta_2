@@ -143,19 +143,19 @@ Visualization Manager:
       Value: true
     - Alpha: 1
       Angular Arrow Scale: 2
-      Angular Color: 204; 204; 51
+      Angular Color: 92; 53; 102
       Arrow Width: 0.5
       Class: rviz/AccelStamped
-      Enabled: false
+      Enabled: true
       Hide Small Values: true
       History Length: 1
-      Linear Arrow Scale: 2
-      Linear Color: 204; 51; 51
+      Linear Arrow Scale: 20
+      Linear Color: 78; 154; 6
       Name: AccelStamped
       Queue Size: 10
       Topic: /platform_setpoint/accel
       Unreliable: false
-      Value: false
+      Value: true
     - Alpha: 1
       Axes Length: 1
       Axes Radius: 0.10000000149011612
@@ -215,7 +215,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 11.708224296569824
+      Distance: 5.8305182456970215
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -231,9 +231,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8297973275184631
+      Pitch: 0.8147972822189331
       Target Frame: <Fixed Frame>
-      Yaw: 5.0235915184021
+      Yaw: 5.643592357635498
     Saved: ~
 Window Geometry:
   Displays:
