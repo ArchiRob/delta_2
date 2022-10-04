@@ -41,6 +41,7 @@ class Stabilisation:
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
         sub_tooltip_twist = rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tip_twist_callback, tcp_nodelay=True)
 
+        # initial values of stuff
         self.manip_mode = "RETRACTED"
         self.home_pos = np.asarray([self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z])
         self.retracted_pos = rospy.get_param('/retracted_position')
@@ -73,22 +74,16 @@ class Stabilisation:
         self.Omega_sp_d = np.asarray([sub_tooltip_twist.twist.angular.x, sub_tooltip_twist.twist.angular.y, sub_tooltip_twist.twist.angular.z])
 
     def drone_pose_callback(self, sub_drone_pose):
-        #initialise position vectors and rotation quaternions
-        #tooltip setpoint position in world frame
-        WT_w = self.X_sp_w
-        #rotation of tooltip/platform in world frame
-        w_q_p = self.Q_sp_w
-         #measured drone base_link position in world frame
         WD_w = np.asarray([sub_drone_pose.pose.position.x, sub_drone_pose.pose.position.y, sub_drone_pose.pose.position.z])
         w_q_d = np.asarray([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
 
-        b_q_d = quaternion_conjugate(self.d_q_b)
-        
+        WT_w = self.X_sp_w
+        w_q_p = self.Q_sp_w
+   
+        b_q_d = quaternion_conjugate(self.d_q_b)      
         d_q_w = quaternion_conjugate(w_q_d)
-        # can definitely make this line more efficient but it works :p, can we cancel b_q_d and d_q_b???
-        b_q_p = quaternion_multiply(quaternion_multiply(w_q_p, quaternion_multiply(b_q_d, d_q_w)), self.d_q_b)
-        BT_d = -self.DB_d + quaternion_rotation(WT_w - WD_w, d_q_w)
-      
+        b_q_p = quaternion_multiply(quaternion_multiply(w_q_p, quaternion_multiply(b_q_d, d_q_w)), self.d_q_b)    
+        BT_d = -self.DB_d + quaternion_rotation(WT_w - WD_w, d_q_w)   
         DB_b = quaternion_rotation(self.DB_d, b_q_d)
 
         if self.manip_mode == "RETRACTED":
