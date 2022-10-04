@@ -61,20 +61,7 @@ class InverseKinematics:
 
         self.stamp = rospy.Time.now()
 
-        #broadcast retracted position as tf
         self.br = tf2_ros.TransformBroadcaster()
-        # tf_retracted = TransformStamped()
-        # tf_retracted.header.frame_id = "stewart_base"
-        # tf_retracted.header.stamp = self.stamp
-        # tf_retracted.child_frame_id = "platform"
-        # tf_retracted.transform.translation.x = self.Q[0]
-        # tf_retracted.transform.translation.y = self.Q[1]
-        # tf_retracted.transform.translation.z = self.Q[2]
-        # tf_retracted.transform.rotation.x = 0.0
-        # tf_retracted.transform.rotation.y = 0.0
-        # tf_retracted.transform.rotation.z = 0.0
-        # tf_retracted.transform.rotation.w = 1.0
-        # self.br.sendTransform(tf_retracted)
 
         #determine platform home position and broadcast tf
         platform_pos_home = PoseStamped()
@@ -112,7 +99,7 @@ class InverseKinematics:
         dt = 1.0 / self.rate
 
         self.Q_dot += self.Q_ddot * dt
-
+    
         self.Q += self.Q_dot * dt
 
         #initialise empty numpy arrays
