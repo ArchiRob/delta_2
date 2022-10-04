@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<!-- Launch file for running the delta-arm only -->
+<launch>
+    <arg name="sim" default="false"/>
+        <include file="$(find delta_2)/launch/run_manipulator.launch">
+            <arg name="sim" value="$(arg sim)"/>
+        </include>
+    <node name="Stabiliser" pkg="delta_2" type="stabilisation.py" required="true" output="screen"/>
+</launch>
