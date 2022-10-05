@@ -81,9 +81,6 @@ class Stabilisation:
         d_q_w = quaternion_conjugate(w_q_d) #rotation from drone frame to world frame      
         b_q_d = quaternion_conjugate(self.d_q_b) #rotation from base frame to drone frame        
         DB_w = quaternion_rotation(self.DB_d, w_q_d) #drone to base vector in world frame        
-        PT_w = quaternion_rotation(quaternion_rotation(self.PT_p, self.d_q_b), self.Q_sp_w) #platform to tooltip vector in world frame        
-        b_q_w = quaternion_multiply(b_q_d, d_q_w) #base to world rotation
-        b_q_p = quaternion_multiply(b_q_w, quaternion_multiply(self.Q_sp_w, self.d_q_b)) 
 
         if self.manip_mode == "RETRACTED":
             self.X = self.retracted_pos
@@ -92,6 +89,9 @@ class Stabilisation:
             self.X = self.home_pos
             self.Q = np.asarray([0, 0, 0, 1])
         elif self.manip_mode == "STAB_3DOF":
+            PT_w = quaternion_rotation(self.PT_p, self.d_q_b) #platform to tooltip vector in world frame        
+            b_q_w = quaternion_multiply(b_q_d, d_q_w) #base to world rotation
+            b_q_p = quaternion_multiply(b_q_w, self.d_q_b)
             drone_angles = euler_from_quaternion([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
             yaw = quaternion_from_euler(0,drone_angles[2], 0)
             DB_b = quaternion_rotation(self.DB_d, b_q_d)
@@ -99,6 +99,9 @@ class Stabilisation:
             self.X = BP_b 
             self.Q = quaternion_multiply(b_q_p, yaw)
         elif self.manip_mode == "STAB_6DOF":   
+            PT_w = quaternion_rotation(quaternion_rotation(self.PT_p, self.d_q_b), self.Q_sp_w) #platform to tooltip vector in world frame        
+            b_q_w = quaternion_multiply(b_q_d, d_q_w) #base to world rotation
+            b_q_p = quaternion_multiply(b_q_w, quaternion_multiply(self.Q_sp_w, self.d_q_b)) 
             BP_w = -DB_w - WD_w + self.X_sp_w - PT_w #base to platform vector in world frame
           
             BP_b = quaternion_rotation(BP_w, b_q_w) #base to platform vector in base frame       
