@@ -6,4 +6,4 @@
         <arg name="sim" value="true"/>
     </include>
     <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
-</launch>   
+</launch>
