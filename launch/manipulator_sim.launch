@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <launch>
     <param name="model_name" value="stewart_platform"/>
-    <include file="$(find delta_2)/launch/spawn_stewart_model.launch"/>
     <include file="$(find delta_2)/launch/run_manipulator.launch">
         <arg name="sim" value="true"/>
     </include>
+    <include file="$(find delta_2)/launch/spawn_stewart_model.launch"/>
     <node name="TestSetpoints" pkg="delta_2" type="test_setpoint_publisher.py" required="true" output="screen"/>
 </launch>

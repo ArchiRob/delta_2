@@ -1,5 +1,15 @@
 #!/usr/bin/env python
-from turtle import home
+
+#-------------------------------------------------------------------------------------------------
+# INVERSE KINEMATICS
+# This script computes the inverse kinematics solution for the stewart platform. Basically
+# it takes position/velocity/acceleration setpoints for the end-effector and works out what
+# the motors need to do. A nice perk of using a parallel manipulator is that these equations
+# can be solved directly (so no faffing about with MoveIt! needed)
+# The callbacks all operate independently so the publishing rates depend on the rate of the input
+# setpoints and are not dependent on eachother.
+#-------------------------------------------------------------------------------------------------
+
 import rospy
 import numpy as np
 import tf2_ros
@@ -22,9 +32,8 @@ class InverseKinematics:
         home_offset = rospy.get_param('/home_offset')
         self.translation_limit = rospy.get_param('/translation_limit')
         self.rotation_limit = rospy.get_param('/rotation_limit')
-        
-        self.rate = rospy.get_param('/servo/rate')
-
+        self.solve = False
+    
         #angles of servo motors about centre of base
         self.beta = np.asarray([np.deg2rad(30), np.deg2rad(30), np.deg2rad(150), np.deg2rad(150), np.deg2rad(270), np.deg2rad(270)])
 
@@ -49,17 +58,18 @@ class InverseKinematics:
             [sb, -rb, 0]])
 
         #generate initial values
-        self.Theta = np.zeros(6)
         self.wRp = np.identity(3)
-        self.M = np.zeros(6)
-        self.N = np.zeros(6)
-        self.L_w = np.zeros((6,3))
+        self.M = np.ones(6)
+        self.N = np.ones(6)
+        self.L_w = np.ones((6,3))
 
         self.Q = np.asarray([pos_retracted[0], pos_retracted[1], pos_retracted[2], 0.0, 0.0, 0.0])
-        self.Q_dot = np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-        self.Q_ddot = np.asarray([0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-
-        self.stamp = rospy.Time.now()
+        self.Q_dot = np.zeros(6)
+        self.Q_ddot = np.zeros(6)
+        
+        self.Theta = np.zeros(6)
+        self.Theta_dot = np.zeros(6)
+        self.Theta_ddot = np.zeros(6)
 
         self.br = tf2_ros.TransformBroadcaster()
 
@@ -75,7 +85,7 @@ class InverseKinematics:
         br_static = tf2_ros.StaticTransformBroadcaster()
         tf_workspace = TransformStamped()
         tf_workspace.header.frame_id = "stewart_base"
-        tf_workspace.header.stamp = self.stamp
+        tf_workspace.header.stamp = rospy.Time.now()
         tf_workspace.child_frame_id = "workspace_center"
         tf_workspace.transform.translation = platform_pos_home.pose.position
         tf_workspace.transform.rotation = platform_pos_home.pose.orientation
@@ -84,27 +94,46 @@ class InverseKinematics:
         self.home_pos = np.asarray([platform_pos_home.pose.position.x, platform_pos_home.pose.position.y, platform_pos_home.pose.position.z])
 
         #init publishers and subscribers
+        self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True)
+        self.pub_servo_velocities = rospy.Publisher('/servo_setpoint/velocities', ServoAnglesStamped, queue_size=1, tcp_nodelay=True)
+        self.pub_servo_accels = rospy.Publisher('/servo_setpoint/accels', ServoAnglesStamped, queue_size=1, tcp_nodelay=True)
+
         #position kinematics
-        self.pub_servo_angles = rospy.Publisher('/servo_setpoint/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) #servo angle publisher
         sub_platform_pos = rospy.Subscriber('/platform_setpoint/pose', PoseStamped, self.pos_callback, tcp_nodelay=True) #target pose subscriber
         #velocity kinematics
         sub_platform_vel = rospy.Subscriber('/platform_setpoint/velocity', TwistStamped, self.vel_callback, tcp_nodelay=True) #target twist subscriber
         #acceleration kinematics
         sub_platform_vel = rospy.Subscriber('/platform_setpoint/accel', AccelStamped, self.accel_callback, tcp_nodelay=True) #target accel subscriber
-        #timer callback
-        rospy.Timer(rospy.Duration(1.0/self.rate), self.callback)
-        
 
-    def callback(self, event): #callback calculates servo angles
-        dt = 1.0 / self.rate
+    def pos_callback(self, platform_pos): 
+        #get Euler angles from quaternion
+        (theta, phi, psi) = euler_from_quaternion([platform_pos.pose.orientation.x, 
+                                                    platform_pos.pose.orientation.y, 
+                                                    platform_pos.pose.orientation.z, 
+                                                    platform_pos.pose.orientation.w])
 
-        self.Q_dot += self.Q_ddot * dt
-    
-        self.Q += self.Q_dot * dt
+        self.Q = np.asarray([platform_pos.pose.position.x, platform_pos.pose.position.y, platform_pos.pose.position.z, 
+                            theta, phi, psi]) 
+
+        #broadcast transform
+        q = quaternion_from_euler(self.Q[3], self.Q[4], self.Q[5])
+        t = TransformStamped()
+        t.header.stamp = platform_pos.header.stamp
+        t.header.frame_id = 'stewart_base'
+        t.child_frame_id = 'platform'
+        t.transform.translation.x = self.Q[0]
+        t.transform.translation.y = self.Q[1]
+        t.transform.translation.z = self.Q[2]
+        t.transform.rotation.x = q[0]
+        t.transform.rotation.y = q[1]
+        t.transform.rotation.z = q[2]
+        t.transform.rotation.w = q[3]
+        self.br.sendTransform(t) 
 
         #initialise empty numpy arrays
         p_w = np.zeros((6,3))
         L_w = np.zeros((6,3))
+        Theta = np.zeros(6)
 
         #calculate platform rotation matrix wRp
         cphi = np.cos(self.Q[4])
@@ -144,84 +173,94 @@ class InverseKinematics:
 
             #check real solution exists -> disc must be in domain of arcsin(), [-1,1]
             if (disc >= 1.0) or (disc <= -1.0):
-                self.Theta[i] = np.nan
+                Theta[i] = np.nan
             else:
-                self.Theta[i] = np.arcsin(disc) - np.arctan(self.N[i] / self.M[i])
+                Theta[i] = np.arcsin(disc) - np.arctan(self.N[i] / self.M[i])
 
-        if not np.any(np.isnan(self.Theta)):
-            #ensure robot wont turn itself inside out (angle between distal linkage and platform cannot exceed 180degrees)
-            c30 = np.cos(np.deg2rad(30))
-            s30 = np.sin(np.deg2rad(30))
-            sTheta = np.sin(self.Theta)
-            cTheta = np.cos(self.Theta)
-            a_w = np.asarray([[self.ra * c30 * cTheta[0], self.ra * s30 * cTheta[0], self.ra * sTheta[0]],
-                    [self.ra * c30 * cTheta[1], self.ra * s30 * cTheta[1], self.ra * sTheta[1]],
-                    [-self.ra * c30 * cTheta[2], self.ra * s30 * cTheta[2], self.ra * sTheta[2]],
-                    [-self.ra * c30 * cTheta[3], self.ra * s30 * cTheta[3], self.ra * sTheta[3]],
-                    [0, -self.ra * cTheta[4], self.ra * sTheta[4]],
-                    [0, -self.ra * cTheta[5], self.ra * sTheta[5]]])
-
-            n = np.matmul(self.wRp, np.asarray([0, 0, 1]))
-            
-            for i in range(6):
-                z = - (n[0] * (a_w[i,0] - X[0]) + n[1] * (a_w[i,1] - X[1])) / n[2] + X[2]
-                for j in range(6):
-                    if a_w[j,2] + 0.01 > z:
-                        self.Theta[i] = np.nan
-
-
-        #publish if all servo angles have been solved
-        if np.any(np.isnan(self.Theta)):
+        #publish if all servo angles have been solved and angles are within defined limits
+        if np.any(np.isnan(Theta)):
             rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS MATHEMATICAL WORKSPACE")
+            self.solve = False
         elif np.any(np.abs(X - self.home_pos) > self.translation_limit) or np.any(np.abs(self.Q[3:6]) > np.deg2rad(self.rotation_limit)):
             rospy.logwarn("MANIPULATOR SETPOINT EXCEEDS DEFINED WORKSPACE")
+            self.solve = False
         else:
-            self.servo_angles = ServoAnglesStamped()
-            self.servo_angles.header.frame_id = "servo"
-            self.servo_angles.header.stamp = rospy.Time.now()
+            self.Theta = Theta
+            self.solve = True
+            servo_angles = ServoAnglesStamped()
+            servo_angles.header.frame_id = "servo"
+            servo_angles.header.stamp = platform_pos.header.stamp
             for i in range(6):
-                self.servo_angles.Theta.append(np.rad2deg(self.Theta[i]))
+                servo_angles.Theta.append(np.rad2deg(self.Theta[i]))
 
-            self.pub_servo_angles.publish(self.servo_angles)  
-
-    def pos_callback(self, platform_pos): 
-        #get Euler angles from quaternion
-        (theta_0, phi_0, psi_0) = euler_from_quaternion([platform_pos.pose.orientation.x, 
-                                                    platform_pos.pose.orientation.y, 
-                                                    platform_pos.pose.orientation.z, 
-                                                    platform_pos.pose.orientation.w])
-
-        self.Q = np.asarray([platform_pos.pose.position.x, platform_pos.pose.position.y, platform_pos.pose.position.z, 
-                            theta_0, phi_0, psi_0])
-
-        self.stamp = platform_pos.header.stamp    
-
-        #broadcast transform
-        q = quaternion_from_euler(self.Q[3], self.Q[4], self.Q[5])
-        t = TransformStamped()
-        t.header.stamp = self.stamp
-        t.header.frame_id = 'stewart_base'
-        t.child_frame_id = 'platform'
-        t.transform.translation.x = self.Q[0]
-        t.transform.translation.y = self.Q[1]
-        t.transform.translation.z = self.Q[2]
-        t.transform.rotation.x = q[0]
-        t.transform.rotation.y = q[1]
-        t.transform.rotation.z = q[2]
-        t.transform.rotation.w = q[3]
-        self.br.sendTransform(t) 
+            self.pub_servo_angles.publish(servo_angles)  
 
     def vel_callback(self, platform_vel):
+        #assign velocities to vector q_dot
+        #angular velocities are assigned in a weird order to represent a frame rotation of -pi/2 about the x axis. This allows us to avoid a singularity.
         self.Q_dot = np.asarray([platform_vel.twist.linear.x, platform_vel.twist.linear.y, platform_vel.twist.linear.z,
-                    platform_vel.twist.angular.x, platform_vel.twist.angular.y, platform_vel.twist.angular.z])
+                            platform_vel.twist.angular.z, platform_vel.twist.angular.x, platform_vel.twist.angular.y])
 
-        self.stamp = platform_vel.header.stamp 
+        #initialise empty numpy arrays
+        n = np.zeros((6,3))
+        p = np.zeros((6,3))
+        J1_inv = np.zeros((6,6))
+        J2_inv = np.identity(6)
+
+        #rotate to avoid singularity when platform is level
+        theta = self.Q[3] - np.pi/2
+        ctheta = np.cos(theta)
+        stheta = np.sin(theta)
+        cpsi = np.cos(self.Q[5])
+        spsi = np.sin(self.Q[5])
+        
+        for i in range(6):
+            #this is the new stuff to calculate velocities
+            n[i,:] = np.divide(self.L_w[i,:], np.linalg.norm(self.L_w[i,:]))
+            w = np.cross(self.p_p[i,:], n[i,:])
+            p[i,:] = np.matmul(self.wRp, w)
+        
+        J1_inv = np.column_stack((n, p))
+
+        #angular velocities
+        omega = np.asarray([[0, cpsi, spsi * stheta],
+                [0, spsi, -cpsi * stheta],
+                [1, 0, ctheta]])    
+
+        J2_inv[3:6, 3:6] = omega
+
+        L_w_dot = np.matmul(np.matmul(J1_inv, J2_inv), self.Q_dot)
+
+        for i in range(6):
+            self.Theta_dot[i] = L_w_dot[i] / (self.M[i] * np.cos(self.Theta[i]) - self.N[i] * np.sin(self.Theta[i]))
+        
+        if not self.solve:
+            self.Theta_dot = np.zeros(6)            
+
+        #publish
+        servo_velocities = ServoAnglesStamped()
+        servo_velocities.header.frame_id = "servo"
+        servo_velocities.header.stamp = platform_vel.header.stamp
+        for i in range(6):
+            servo_velocities.Theta.append(np.rad2deg(self.Theta_dot[i]))
+        self.pub_servo_velocities.publish(servo_velocities)
+
+        #add something here to increment recycled quantities like L_w
 
     def accel_callback(self, platform_accel):
+        #todo: accel kinematics
         self.Q_ddot = np.asarray([platform_accel.accel.linear.x, platform_accel.accel.linear.y, platform_accel.accel.linear.z,
                             0.0, 0.0, 0.0])
 
-        self.stamp = platform_accel.header.stamp 
+        if not self.solve:
+            self.Theta_ddot = np.zeros(6) 
+        #publish
+        servo_accels = ServoAnglesStamped()
+        servo_accels.header.frame_id = "servo"
+        servo_accels.header.stamp = platform_accel.header.stamp
+        for i in range(6):
+            servo_accels.Theta.append(np.rad2deg(self.Theta_ddot[i]))
+        self.pub_servo_accels.publish(servo_accels)
 
 if __name__ == '__main__': #initialise node and run loop
     rospy.init_node('inverse_kinematics')

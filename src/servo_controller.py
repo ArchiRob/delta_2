@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+#-----------------------------------------------------------------------------------------------
+# DYNAMIXEL SERVO CONTROLLER
+# Wow this script is a mess. Start from the bottom.
+# The aim here is to take position/velocity/acceleration setpoints for dynamixel servos
+# (all coming in at different frequencies) and use them to generate position setpoints at high
+# speed. As an extra bonus it works on an arbitrary number of servos! It makes use of the 
+# FastSyncRead protocol from the Dynamixel SDK 'develop' branch to make things really speedy.
+# I can get 500Hz reading and writing with 6 motors which is pretty darn good imo :p.
+# Use dynamic_reconfigure + rqt_plot for live PID tuning
+#-----------------------------------------------------------------------------------------------
+
 import rospy
 import numpy as np
 from delta_2.msg import ServoAnglesStamped
@@ -72,10 +83,16 @@ class ServoController:
         srv = Server(ServoConfig, self.config_callback)
         
         self.pos_pub = rospy.Publisher('/servo_detected/positions', ServoAnglesStamped, queue_size=1, tcp_nodelay=True) # servo angle publisher
+        servo_pos_sub = rospy.Subscriber('/servo_setpoint/positions', ServoAnglesStamped, self.pos_sp_callback, tcp_nodelay=True) #target angle subscriber
+        servo_vel_sub = rospy.Subscriber('/servo_setpoint/velocities', ServoAnglesStamped, self.vel_sp_callback, tcp_nodelay=True) #target vel subscriber
+        servo_acc_sub = rospy.Subscriber('/servo_setpoint/accels', ServoAnglesStamped, self.acc_sp_callback, tcp_nodelay=True) #target acc subscriber
 
-        servo_pos_sub = rospy.Subscriber('/servo_setpoint/positions', ServoAnglesStamped, self.pos_sp_callback, tcp_nodelay=True) #target pose subscriber
-
-        self.POS_CMD = np.asarray([0, 0, 0, 0, 0, 0])
+        self.POS_SP = np.zeros(NUM_SERVOS)
+        self.VEL_SP = np.zeros(NUM_SERVOS)
+        self.ACC_SP = np.zeros(NUM_SERVOS)
+        self.stamp_latest = rospy.Time.now()
+        self.vel_stamp_last = rospy.Time.now()
+        self.acc_stamp_last = rospy.Time.now()
         
         rospy.Timer(rospy.Duration(1.0/RATE), self.servo_callback)
 
@@ -83,8 +100,38 @@ class ServoController:
         self.settings_changed = True
         self.config = config
         return config
+
+    def pos_sp_callback(self, pos_sub):
+        self.POS_SP = pos_sub.Theta
+        self.stamp_latest = pos_sub.header.stamp
+
+    def vel_sp_callback(self, vel_sub):
+        self.VEL_SP = vel_sub.Theta
+        
+        #increment theta
+        dt = rospy.Time.to_sec(vel_sub.header.stamp) - rospy.Time.to_sec(self.vel_stamp_last)
+        self.vel_stamp_last = vel_sub.header.stamp
+        self.POS_SP += self.VEL_SP * dt
+
+        self.stamp_latest = vel_sub.header.stamp
+
+    def acc_sp_callback(self, acc_sub):
+        self.ACC_SP = acc_sub.Theta
+        
+        #increment theta_dot
+        dt = rospy.Time.to_sec(acc_sub.header.stamp) - rospy.Time.to_sec(self.acc_stamp_last)
+        self.acc_stamp_last = acc_sub.header.stamp
+        self.VEL_SP += self.ACC_SP * dt
+
+        self.stamp_latest = acc_sub.header.stamp
                
     def servo_callback(self, event):
+        #calculate most up-to-date position setpoint
+        #using the callbacks, we have a low rate position setpoint + added velocity and acceleration interpolation
+        #by assuming constant acceleration since the last measurement we can extrapolate to give new setpoints at high rate:
+        dt = rospy.Time.to_sec(rospy.Time.now()) - rospy.Time.to_sec(self.stamp_latest)
+        self.POS_SP += self.VEL_SP * dt + 0.5 * self.ACC_SP * dt**2
+
         if self.config.read_positions:
             # Fast Sync Read present position
             dxl_comm_result = groupSyncRead.fastSyncRead()
@@ -148,10 +195,10 @@ class ServoController:
             for i in range(NUM_SERVOS):
                 # Allocate goal position value into byte array
                 param_goal_position = [
-                    DXL_LOBYTE(DXL_LOWORD(deg2bits(self.POS_CMD[i]))),
-                    DXL_HIBYTE(DXL_LOWORD(deg2bits(self.POS_CMD[i]))),
-                    DXL_LOBYTE(DXL_HIWORD(deg2bits(self.POS_CMD[i]))),
-                    DXL_HIBYTE(DXL_HIWORD(deg2bits(self.POS_CMD[i])))]
+                    DXL_LOBYTE(DXL_LOWORD(deg2bits(self.POS_SP[i]))),
+                    DXL_HIBYTE(DXL_LOWORD(deg2bits(self.POS_SP[i]))),
+                    DXL_LOBYTE(DXL_HIWORD(deg2bits(self.POS_SP[i]))),
+                    DXL_HIBYTE(DXL_HIWORD(deg2bits(self.POS_SP[i])))]
 
                 # Add DYNAMIXEL#1 goal position value to the Syncwrite parameter storage
                 dxl_addparam_result = groupSyncWrite.addParam(int(i+1), param_goal_position)
@@ -165,14 +212,6 @@ class ServoController:
 
             # Clear syncwrite parameter storage
             groupSyncWrite.clearParam()
-
-    def pos_sp_callback(self, pos_sub):
-        DXL_POS_SP = []
-
-        for i in range(NUM_SERVOS):
-            DXL_POS_SP.append(pos_sub.Theta[i])
-
-        self.POS_CMD = DXL_POS_SP
 
 def bits2deg(bits):
     deg = float(bits - 2048) * 0.0878906

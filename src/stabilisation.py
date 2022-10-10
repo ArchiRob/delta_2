@@ -1,17 +1,25 @@
 #!/usr/bin/env python
-from re import sub
+
+#------------------------------------------------------------------------------------------------
+# STABILISATION
+# I make no apologies for using the english spelling of 'stabilise'
+# This code works out the manipulator setpoints to stabilise against random motion about a
+# pre-defined centre (using the tf package). I had all sorts of issues with making closed 
+# loops when trying to use the tf package to do this so I threw my hands up and worked out
+# all the coordinate rotations with pen and paper and lots of trial and error. You have 
+# absolutely no chance of following the maths here and I'm not 100% sure I understand it
+# myself.
+#------------------------------------------------------------------------------------------------
+
 import rospy
 import numpy as np
 import tf2_ros
 
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Vector3, AccelStamped
 from tf.transformations import quaternion_multiply, quaternion_conjugate, euler_from_quaternion, quaternion_from_euler
-from tf2_geometry_msgs import do_transform_vector3
-from message_filters import ApproximateTimeSynchronizer, Subscriber
 from mavros_msgs.msg import State
 from sensor_msgs.msg import Imu
 
-#code to generate end-effector setpoints accounting for random drone perturbations
 class Stabilisation:
     def __init__(self):
         #init tf listener
@@ -30,17 +38,21 @@ class Stabilisation:
         self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
 
         #init publishers and subscribers
-        self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
-        self.pub_platform_twist = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
-        self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
+        sub_drone_state = rospy.Subscriber('/mavros/state', State, self.state_callback, tcp_nodelay=True)
         
-        sub_drone_state = rospy.Subscriber('/mavros/state', State, self.state_callback, tcp_nodelay=True) #target pose subscriber
-        sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
-        sub_drone_twist = rospy.Subscriber('/mavros/local_position/velocity_body', TwistStamped, self.drone_twist_callback, tcp_nodelay=True)
-        sub_drone_accel = rospy.Subscriber('/mavros/imu/data', Imu, self.drone_accel_callback, tcp_nodelay=True)
+        self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
-        sub_tooltip_twist = rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tip_twist_callback, tcp_nodelay=True)
-
+        sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
+        
+        if rospy.get_param('stabilise/velocity'):
+            self.pub_platform_twist = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+            sub_tooltip_twist = rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tip_twist_callback, tcp_nodelay=True)
+            sub_drone_twist = rospy.Subscriber('/mavros/local_position/velocity_body', TwistStamped, self.drone_twist_callback, tcp_nodelay=True)
+        
+        if rospy.get_param('stabilise/accel'):
+            self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
+            sub_drone_accel = rospy.Subscriber('/mavros/imu/data', Imu, self.drone_accel_callback, tcp_nodelay=True)
+        
         # initial values of stuff
         self.manip_mode = "RETRACTED"
         self.home_pos = np.asarray([self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z])

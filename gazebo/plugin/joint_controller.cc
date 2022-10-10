@@ -34,8 +34,8 @@ namespace gazebo
             m_model = _model;
             m_joints = m_model->GetJoints();
 
-            common::PID pid_pos(0.3, 0.06, 0.0); //placeholder values, need to do an input parameter for this
-            common::PID pid_vel(0.01, 0.005, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_pos(0.25, 0.05, 0.0); //placeholder values, need to do an input parameter for this
+            common::PID pid_vel(0.0, 0.0, 0.0); //placeholder values, need to do an input parameter for this
 
             for (const auto& joint: m_joints)
                 m_model->GetJointController()->SetPositionPID(joint->GetScopedName(), pid_pos);
@@ -50,7 +50,7 @@ namespace gazebo
             // Subscribe to /model_name/position_cmd topic (you publish to this to set positions)
             ros::SubscribeOptions so = ros::SubscribeOptions::create<std_msgs::Float32MultiArray>(
                 "/" + m_model->GetName() + "/position_cmd", 
-                100, 
+                500, 
                 boost::bind(&SDFJointController::setPosition, this, _1),
                 ros::VoidPtr(),
                 &m_ros_queue);

@@ -2,7 +2,7 @@
 <launch>
     <env name="GAZEBO_PLUGIN_PATH" value="${GAZEBO_PLUGIN_PATH}:$(find delta_2)/gazebo/plugin/build" />
     <env name="GAZEBO_MODEL_PATH" value="${GAZEBO_MODEL_PATH}:$(find delta_2)/gazebo/models" />
-
+    
     <arg name = "paused" default = "false"/>
     <arg name = "use_sim_time" default = "true"/>
     <arg name = "gui" default = "true"/>
