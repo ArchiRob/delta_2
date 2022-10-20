@@ -87,9 +87,9 @@ class ServoController:
         servo_vel_sub = rospy.Subscriber('/servo_setpoint/velocities', ServoAnglesStamped, self.vel_sp_callback, tcp_nodelay=True) #target vel subscriber
         servo_acc_sub = rospy.Subscriber('/servo_setpoint/accels', ServoAnglesStamped, self.acc_sp_callback, tcp_nodelay=True) #target acc subscriber
 
-        self.POS_SP = np.zeros(NUM_SERVOS)
-        self.VEL_SP = np.zeros(NUM_SERVOS)
-        self.ACC_SP = np.zeros(NUM_SERVOS)
+        self.POS_SP = [0] * NUM_SERVOS
+        self.VEL_SP = [0] * NUM_SERVOS
+        self.ACC_SP = [0] * NUM_SERVOS
         self.stamp_latest = rospy.Time.now()
         self.vel_stamp_last = rospy.Time.now()
         self.acc_stamp_last = rospy.Time.now()
@@ -102,11 +102,11 @@ class ServoController:
         return config
 
     def pos_sp_callback(self, pos_sub):
-        self.POS_SP = pos_sub.Theta
+        self.POS_SP = list(pos_sub.Theta)
         self.stamp_latest = pos_sub.header.stamp
 
     def vel_sp_callback(self, vel_sub):
-        self.VEL_SP = vel_sub.Theta
+        self.VEL_SP = list(vel_sub.Theta)
         
         #increment theta
         dt = rospy.Time.to_sec(vel_sub.header.stamp) - rospy.Time.to_sec(self.vel_stamp_last)
@@ -117,7 +117,7 @@ class ServoController:
         self.stamp_latest = vel_sub.header.stamp
 
     def acc_sp_callback(self, acc_sub):
-        self.ACC_SP = acc_sub.Theta
+        self.ACC_SP = list(acc_sub.Theta)
         
         #increment theta_dot
         dt = rospy.Time.to_sec(acc_sub.header.stamp) - rospy.Time.to_sec(self.acc_stamp_last)
