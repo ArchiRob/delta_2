@@ -26,7 +26,7 @@ class SimConverter:
     def servo_callback(self, event):
         dt = 1.0/self.rate
         self.pos_sp += self.vel_sp * dt + 0.5 * self.acc_sp * dt**2
-        print(self.pos_sp)
+        # print(self.pos_sp)
         angles = np.deg2rad(self.pos_sp).tolist()
         self.pub_servo_angles.publish(Float32MultiArray(MultiArrayLayout(), angles))
     

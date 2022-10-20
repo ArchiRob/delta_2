@@ -55,7 +55,6 @@ dynamic_reconfigure
 # Generate messages in the 'msg' folder
 add_message_files(
   FILES
-  ServoAngles6DoFStamped.msg
   ServoAnglesStamped.msg
 )
 

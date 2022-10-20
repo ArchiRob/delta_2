@@ -15,9 +15,9 @@ import rospy
 import numpy as np
 import tf2_ros
 
+from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped, TwistStamped, Vector3Stamped, Vector3, AccelStamped
 from tf.transformations import quaternion_multiply, quaternion_conjugate, euler_from_quaternion, quaternion_from_euler
-from mavros_msgs.msg import State
 from sensor_msgs.msg import Imu
 
 class Stabilisation:
@@ -38,7 +38,7 @@ class Stabilisation:
         self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
 
         #init publishers and subscribers
-        sub_drone_state = rospy.Subscriber('/mavros/state', State, self.state_callback, tcp_nodelay=True)
+        sub_manipulator_state = rospy.Subscriber('/manipulator/state', String, self.state_callback, tcp_nodelay=True)
         
         self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
@@ -64,15 +64,7 @@ class Stabilisation:
         self.X = self.retracted_pos
 
     def state_callback(self, state):
-        if state.armed:
-            if state.mode == "OFFBOARD":
-                self.manip_mode = "STAB_6DOF"
-            elif state.mode == "POSCTL":
-                self.manip_mode = "STAB_3DOF"
-            else:
-                self.manip_mode = "HOME"
-        else:
-            self.manip_mode = "RETRACTED"
+        self.manip_mode = state.data
 
     def tip_pose_callback(self, sub_tooltip_pose):
         #tooltip setpoint position in world frame
@@ -113,7 +105,7 @@ class Stabilisation:
         elif self.manip_mode == "STAB_6DOF":   
             PT_w = quaternion_rotation(quaternion_rotation(self.PT_p, self.d_q_b), self.Q_sp_w) #platform to tooltip vector in world frame        
             b_q_w = quaternion_multiply(b_q_d, d_q_w) #base to world rotation
-            b_q_p = quaternion_multiply(b_q_w, quaternion_multiply(self.Q_sp_w, self.d_q_b)) 
+            b_q_p = quaternion_multiply(b_q_w, self.Q_sp_w)
             BP_w = -DB_w - WD_w + self.X_sp_w - PT_w #base to platform vector in world frame
           
             BP_b = quaternion_rotation(BP_w, b_q_w) #base to platform vector in base frame       
