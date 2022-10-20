@@ -111,7 +111,8 @@ class ServoController:
         #increment theta
         dt = rospy.Time.to_sec(vel_sub.header.stamp) - rospy.Time.to_sec(self.vel_stamp_last)
         self.vel_stamp_last = vel_sub.header.stamp
-        self.POS_SP += self.VEL_SP * dt
+        for i in range(NUM_SERVOS):
+            self.POS_SP[i] += self.VEL_SP[i] * dt
 
         self.stamp_latest = vel_sub.header.stamp
 
@@ -121,7 +122,8 @@ class ServoController:
         #increment theta_dot
         dt = rospy.Time.to_sec(acc_sub.header.stamp) - rospy.Time.to_sec(self.acc_stamp_last)
         self.acc_stamp_last = acc_sub.header.stamp
-        self.VEL_SP += self.ACC_SP * dt
+        for i in range(NUM_SERVOS):
+            self.VEL_SP[i] += self.ACC_SP[i] * dt
 
         self.stamp_latest = acc_sub.header.stamp
                
@@ -130,7 +132,9 @@ class ServoController:
         #using the callbacks, we have a low rate position setpoint + added velocity and acceleration interpolation
         #by assuming constant acceleration since the last measurement we can extrapolate to give new setpoints at high rate:
         dt = rospy.Time.to_sec(rospy.Time.now()) - rospy.Time.to_sec(self.stamp_latest)
-        self.POS_SP += self.VEL_SP * dt + 0.5 * self.ACC_SP * dt**2
+
+        for i in range(NUM_SERVOS):
+            self.POS_SP[i] += self.VEL_SP[i] * dt + 0.5 * self.ACC_SP[i] * dt**2
 
         if self.config.read_positions:
             # Fast Sync Read present position
