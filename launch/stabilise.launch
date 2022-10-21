@@ -12,8 +12,8 @@
     </include>
 
     <rosparam>
-        /stabilise/velocity: false
-        /stabilise/accel: false
+        /stabilise/velocity: true
+        /stabilise/accel: true
     </rosparam>
 
     <node name="Stabiliser" pkg="delta_2" type="stabilisation.py" required="true" output="screen"/>
