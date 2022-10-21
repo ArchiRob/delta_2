@@ -38,8 +38,7 @@ class Stabilisation:
         self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
 
         #init publishers and subscribers
-        sub_manipulator_state = rospy.Subscriber('/manipulator/state', String, self.state_callback, tcp_nodelay=True)
-        
+        sub_manipulator_state = rospy.Subscriber('/manipulator/state', String, self.state_callback, tcp_nodelay=True)    
         self.pub_platform_pose = rospy.Publisher('/platform_setpoint/pose', PoseStamped, queue_size=1, tcp_nodelay=True)
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
         sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
@@ -62,6 +61,8 @@ class Stabilisation:
         self.X_sp_w = np.asarray([0.0, 0.0, 0.0])
         self.Q_sp_W = self.d_q_b
         self.X = self.retracted_pos
+
+        rospy.spin()
 
     def state_callback(self, state):
         self.manip_mode = state.data
@@ -200,4 +201,3 @@ def quaternion_rotation(vector, quaternion):
 if __name__ == '__main__': #initialise node and run loop
     rospy.init_node('stabilisation')
     S = Stabilisation()
-    rospy.spin()
