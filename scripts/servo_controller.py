@@ -106,7 +106,7 @@ class ServoController:
         self.stamp_latest = pos_sub.header.stamp
 
     def vel_sp_callback(self, vel_sub):
-        self.VEL_SP = list(vel_sub.Theta)
+        # self.VEL_SP = list(vel_sub.Theta)
         
         #increment theta
         dt = rospy.Time.to_sec(vel_sub.header.stamp) - rospy.Time.to_sec(self.vel_stamp_last)
@@ -117,7 +117,7 @@ class ServoController:
         self.stamp_latest = vel_sub.header.stamp
 
     def acc_sp_callback(self, acc_sub):
-        self.ACC_SP = list(acc_sub.Theta)
+        # self.ACC_SP = list(acc_sub.Theta)
         
         #increment theta_dot
         dt = rospy.Time.to_sec(acc_sub.header.stamp) - rospy.Time.to_sec(self.acc_stamp_last)
