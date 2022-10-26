@@ -17,6 +17,7 @@ import tf2_ros
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from scipy.spatial.transform import Rotation as R
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 class Stabilisation:
     def __init__(self):
@@ -79,8 +80,9 @@ class Stabilisation:
             b_R_w = b_R_d * d_R_w #base to world rotation
             b_R_p = b_R_w * self.d_R_b
             
-            drone_angles = w_R_d.as_euler('zxy')
-            yaw = w_R_d.from_euler('zxy', [drone_angles[0], 0, 0])
+            drone_angles = euler_from_quaternion([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
+            yaw = quaternion_from_euler(0,drone_angles[2], 0)
+            yaw = R.from_quat(yaw)
 
             DB_b = b_R_d.apply(self.DB_d)
             BP_b = (b_R_p * yaw).apply(self.home_pos + DB_b) - DB_b
