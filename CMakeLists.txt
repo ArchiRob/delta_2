@@ -17,6 +17,8 @@ dynamixel_workbench_toolbox
 dynamixel_sdk
 message_generation
 dynamic_reconfigure
+tf2
+tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,7 +112,15 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  LIBRARIES ${PROJECT_NAME}
- CATKIN_DEPENDS roscpp rospy std_msgs dynamixel_workbench_msgs message_runtime dynamic_reconfigure
+ CATKIN_DEPENDS 
+ roscpp 
+ rospy 
+ std_msgs 
+ dynamixel_workbench_msgs 
+ message_runtime 
+ dynamic_reconfigure 
+ tf2 
+ tf2_ros
 )
 
 ###########
@@ -120,8 +130,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-# ${catkin_INCLUDE_DIRS}
+${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -137,7 +146,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/delta_2_node.cpp)
+add_executable(inverse_kinematics_node src/inverse_kinematics_fast.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -149,10 +158,10 @@ include_directories(
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+# Specify libraries to link a library or executable target against
+target_link_libraries(inverse_kinematics_node
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
