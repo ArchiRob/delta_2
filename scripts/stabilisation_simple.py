@@ -14,6 +14,7 @@
 import rospy
 import numpy as np
 import tf2_ros
+from mavros_msgs.msg import State, ExtendedState, PositionTarget
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
 from scipy.spatial.transform import Rotation as R
@@ -34,6 +35,10 @@ class Stabilisation:
         self.PT_p = [p_tf_t.transform.translation.x, p_tf_t.transform.translation.y, p_tf_t.transform.translation.z]
         self.p_R_t = R.from_quat([p_tf_t.transform.rotation.x, p_tf_t.transform.rotation.y, p_tf_t.transform.rotation.z, p_tf_t.transform.rotation.w])
 
+        d_tf_ti = self.tfBuffer.lookup_transform('base_link', 'tooltip_init', time=rospy.Time(0), timeout=rospy.Duration(10))
+        self.DTi_d = [d_tf_ti.transform.translation.x, d_tf_ti.transform.translation.y, d_tf_ti.transform.translation.z]
+        self.d_R_ti = R.from_quat([d_tf_ti.transform.rotation.x, d_tf_ti.transform.rotation.y, d_tf_ti.transform.rotation.z, d_tf_ti.transform.rotation.w])
+
         self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
 
         #init publishers and subscribers
@@ -42,6 +47,9 @@ class Stabilisation:
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
         sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
         
+        sp_raw_sub = rospy.Subscriber(
+            '/mavros/setpoint_raw/target_local', PositionTarget, self.sp_raw_cb, queue_size=1, tcp_nodelay=True)
+
         # initial values of stuff
         self.manip_mode = "RETRACTED"
         self.home_pos = [self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z]
@@ -49,6 +57,9 @@ class Stabilisation:
         self.WT_w = [0.0, 0.0, 0.0]
         self.w_R_p = self.d_R_b
         self.BT_b = self.retracted_pos
+        self.tip_R = self.w_R_p
+        self.tip_pos = [0.0, 0.0, 0.0]
+        self.WD_w = [0.0, 0.0, 0.0]
         rospy.spin()
 
     def state_callback(self, state):
@@ -61,8 +72,16 @@ class Stabilisation:
         # print([sub_tooltip_pose.pose.orientation.x, sub_tooltip_pose.pose.orientation.y, sub_tooltip_pose.pose.orientation.z, sub_tooltip_pose.pose.orientation.w])
         self.w_R_p = R.from_quat([sub_tooltip_pose.pose.orientation.x, sub_tooltip_pose.pose.orientation.y, sub_tooltip_pose.pose.orientation.z, sub_tooltip_pose.pose.orientation.w]) 
 
+    def sp_raw_cb(self, sp_raw):
+        self.drone_raw_pos = [sp_raw.position.x, sp_raw.position.y, sp_raw.position.z]
+        for i in range(3):
+            if np.isnan(self.drone_raw_pos[i]):
+                self.drone_raw_pos[i] = self.WD_w[i]
+        drone_yaw_quat = quaternion_from_euler(0, 0, sp_raw.yaw)
+        self.drone_raw_R = R.from_quat(drone_yaw_quat) 
+
     def drone_pose_callback(self, sub_drone_pose):
-        WD_w = np.asarray([sub_drone_pose.pose.position.x, sub_drone_pose.pose.position.y, sub_drone_pose.pose.position.z])
+        self.WD_w = np.asarray([sub_drone_pose.pose.position.x, sub_drone_pose.pose.position.y, sub_drone_pose.pose.position.z])
         w_R_d = R.from_quat([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
               
         d_R_w = w_R_d.inv() #rotation from drone frame to world frame      
@@ -79,11 +98,9 @@ class Stabilisation:
             PT_w = self.d_R_b.apply(self.PT_p) #platform to tooltip vector in world frame        
             b_R_w = b_R_d * d_R_w #base to world rotation
             b_R_p = b_R_w * self.d_R_b
-            
             drone_angles = euler_from_quaternion([sub_drone_pose.pose.orientation.x, sub_drone_pose.pose.orientation.y, sub_drone_pose.pose.orientation.z, sub_drone_pose.pose.orientation.w])
             yaw = quaternion_from_euler(0,drone_angles[2], 0)
             yaw = R.from_quat(yaw)
-
             DB_b = b_R_d.apply(self.DB_d)
             BP_b = (b_R_p * yaw).apply(self.home_pos + DB_b) - DB_b
             self.X = BP_b 
@@ -92,11 +109,20 @@ class Stabilisation:
             PT_w = self.w_R_p.apply(self.d_R_b.apply(self.PT_p)) #platform to tooltip vector in world frame     
             b_R_w = b_R_d * d_R_w #base to world rotation
             b_R_p = b_R_w * self.w_R_p
-            BP_w = -DB_w - WD_w + self.WT_w - PT_w #base to platform vector in world frame
+            BP_w = -DB_w - self.WD_w + self.WT_w - PT_w #base to platform vector in world frame
             BP_b = b_R_w.apply(BP_w) #base to platform vector in base frame       
             self.X = BP_b
             self.Q = b_R_p.as_quat()
-    
+        elif self.manip_mode == "STAB_6DOF-MANUAL":  
+            PT_w = self.drone_raw_R.apply(self.d_R_b.apply(self.PT_p)) #platform to tooltip vector in world frame
+            WT_w = self.drone_raw_pos + self.drone_raw_R.apply(self.DTi_d) #tooltip position in world frame
+            b_R_w = b_R_d * d_R_w #base to world rotation
+            b_R_p = b_R_w * self.drone_raw_R
+            BP_w = -DB_w - self.WD_w + WT_w - PT_w #base to platform vector in world frame
+            BP_b = b_R_w.apply(BP_w) #base to platform vector in base frame       
+            self.X = BP_b
+            self.Q = (b_R_p * self.d_R_b).as_quat()
+
         #fill in pose msg and publish
         platform_pose = PoseStamped()
         platform_pose.header.frame_id = 'stewart_base'

@@ -11,10 +11,5 @@
         <arg name="sim" value="$(arg sim)"/>
     </include>
 
-    <rosparam>
-        /stabilise/velocity: true
-        /stabilise/accel: true
-    </rosparam>
-
     <node name="Stabiliser" pkg="delta_2" type="stabilisation_simple.py" required="true" output="screen"/>
 </launch>
