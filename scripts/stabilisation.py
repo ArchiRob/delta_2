@@ -33,7 +33,7 @@ class Stabilisation:
         self.V_sp_d = np.asarray([0.0, 0.0, 0.0])
         self.Omega_sp_d = np.asarray([0.0, 0.0, 0.0])
         self.X_sp_w = np.asarray([0.0, 0.0, 0.0])
-        self.Q_sp_W = self.d_q_b
+        self.Q_sp_W = np.asarray([0.0, 0.0, 0.0, 1.0])
         self.X = self.retracted_pos
 
         #obtain transforms and convert to numpy arrays for later
