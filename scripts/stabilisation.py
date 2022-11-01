@@ -25,7 +25,7 @@ class Stabilisation:
         #init tf listener
         self.tfBuffer = tf2_ros.Buffer()
         tfListener = tf2_ros.TransformListener(self.tfBuffer)
-
+        self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
         # initial values of stuff
         self.manip_mode = "RETRACTED"
         self.home_pos = np.asarray([self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z])
@@ -45,7 +45,7 @@ class Stabilisation:
         self.PT_p = np.asarray([p_tf_t.transform.translation.x, p_tf_t.transform.translation.y, p_tf_t.transform.translation.z])
         self.p_q_t = np.asarray([p_tf_t.transform.rotation.x, p_tf_t.transform.rotation.y, p_tf_t.transform.rotation.z, p_tf_t.transform.rotation.w])
 
-        self.home_tf = self.tfBuffer.lookup_transform('stewart_base', 'workspace_center', time=rospy.Time(0), timeout=rospy.Duration(10))
+        
 
         #init publishers and subscribers
         sub_manipulator_state = rospy.Subscriber('/manipulator/state', String, self.state_callback, tcp_nodelay=True)    
