@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: delta_2
+Description: Description of delta_2
+Version: 0.1.5
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -ldelta_2
+Requires: roscpp rospy std_msgs dynamixel_workbench_msgs message_runtime dynamic_reconfigure tf2 tf2_ros
