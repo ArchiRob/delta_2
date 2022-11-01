@@ -43,14 +43,13 @@ class Stabilisation:
         sub_tooltip_pose = rospy.Subscriber('/tooltip_setpoint/pose', PoseStamped, self.tip_pose_callback, tcp_nodelay=True)
         sub_drone_pose = rospy.Subscriber('/mavros/local_position/pose', PoseStamped, self.drone_pose_callback, tcp_nodelay=True)
         
-        if rospy.get_param('stabilise/velocity'):
-            self.pub_platform_twist = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
-            sub_tooltip_twist = rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tip_twist_callback, tcp_nodelay=True)
-            sub_drone_twist = rospy.Subscriber('/mavros/local_position/velocity_body', TwistStamped, self.drone_twist_callback, tcp_nodelay=True)
-        
-        if rospy.get_param('stabilise/accel'):
-            self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
-            sub_drone_accel = rospy.Subscriber('/mavros/imu/data', Imu, self.drone_accel_callback, tcp_nodelay=True)
+        self.pub_platform_twist = rospy.Publisher('/platform_setpoint/velocity', TwistStamped, queue_size=1, tcp_nodelay=True)
+        sub_tooltip_twist = rospy.Subscriber('/tooltip_setpoint/velocity', TwistStamped, self.tip_twist_callback, tcp_nodelay=True)
+        sub_drone_twist = rospy.Subscriber('/mavros/local_position/velocity_body', TwistStamped, self.drone_twist_callback, tcp_nodelay=True)
+    
+
+        self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
+        sub_drone_accel = rospy.Subscriber('/mavros/imu/data', Imu, self.drone_accel_callback, tcp_nodelay=True)
         
         # initial values of stuff
         self.manip_mode = "RETRACTED"
