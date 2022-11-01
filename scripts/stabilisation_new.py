@@ -91,7 +91,7 @@ class Stabilisation:
             self.BP_b = b_R_p_noyaw.apply(self.home_pos + DB_b) - DB_b
             b_R_p = b_R_p_noyaw
         elif self.stabilising_mode == "STAB_6DOF": 
-            BT_b, b_R_t = self._lookup_vec_and_rot('stewart_base', 'tooltip_setpoint', TimeStamp=sub_drone_pose.header.stamp-rospy.Duration(0.003))
+            BT_b, b_R_t = self._lookup_vec_and_rot('stewart_base', 'tooltip_setpoint', TimeStamp=sub_drone_pose.header.stamp)
             self.BP_b = BT_b - b_R_t.apply(self.PT_p)
             b_R_p = b_R_t
 
