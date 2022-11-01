@@ -11,5 +11,5 @@
         <arg name="sim" value="$(arg sim)"/>
     </include>
 
-    <node name="Stabiliser" pkg="delta_2" type="stabilisation_new.py" required="true" output="screen"/>
+    <node name="Stabiliser" pkg="delta_2" type="stabilisation.py" required="true" output="screen"/>
 </launch>

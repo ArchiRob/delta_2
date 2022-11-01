@@ -91,7 +91,7 @@ class Stabilisation:
             self.BP_b = b_R_p_noyaw.apply(self.home_pos + DB_b) - DB_b
             b_R_p = b_R_p_noyaw
         elif self.stabilising_mode == "STAB_6DOF": 
-            BT_b, b_R_t = self._lookup_vec_and_rot('stewart_base', 'tooltip_setpoint')
+            BT_b, b_R_t = self._lookup_vec_and_rot('stewart_base', 'tooltip_setpoint', TimeStamp=sub_drone_pose.header.stamp-rospy.Duration(0.003))
             self.BP_b = BT_b - b_R_t.apply(self.PT_p)
             b_R_p = b_R_t
 
@@ -176,8 +176,8 @@ class Stabilisation:
         t.transform.rotation.w = pose.pose.orientation.w
         self.tfBroadcaster.sendTransform(t)
 
-    def _lookup_vec_and_rot(self, frame_id, child_frame_id, Timeout=0.1):
-        tf = self.tfBuffer.lookup_transform(frame_id, child_frame_id, time=rospy.Time.now(), timeout=rospy.Duration(Timeout))       
+    def _lookup_vec_and_rot(self, frame_id, child_frame_id, Timeout=0.01, TimeStamp=rospy.Time.now()):
+        tf = self.tfBuffer.lookup_transform(frame_id, child_frame_id, time=TimeStamp, timeout=rospy.Duration(Timeout))       
         translation, rotation = self._msg_to_vec_and_rot(tf)
         return translation, rotation
 
