@@ -60,6 +60,7 @@ class Stabilisation:
         self.tip_R = self.w_R_p
         self.tip_pos = [0.0, 0.0, 0.0]
         self.WD_w = [0.0, 0.0, 0.0]
+        self.drone_raw_pos = [0.0, 0.0, 0.0]
         rospy.spin()
 
     def state_callback(self, state):
@@ -73,10 +74,16 @@ class Stabilisation:
         self.w_R_p = R.from_quat([sub_tooltip_pose.pose.orientation.x, sub_tooltip_pose.pose.orientation.y, sub_tooltip_pose.pose.orientation.z, sub_tooltip_pose.pose.orientation.w]) 
 
     def sp_raw_cb(self, sp_raw):
-        self.drone_raw_pos = [sp_raw.position.x, sp_raw.position.y, sp_raw.position.z]
+        drone_raw_pos = [sp_raw.position.x, sp_raw.position.y, sp_raw.position.z]
+        self.drone_raw_vel = [sp_raw.velocity.x, sp_raw.velocity.y, sp_raw.velocity.z]
         for i in range(3):
-            if np.isnan(self.drone_raw_pos[i]):
+            if np.isnan(drone_raw_pos[i]):
                 self.drone_raw_pos[i] = self.WD_w[i]
+            elif self.drone_raw_vel[i] < 0.2:
+                self.drone_raw_pos[i] += self.drone_raw_vel[i] * (rospy.Time.to_sec(rospy.Time.now()) - rospy.Time.to_sec(sp_raw.header.stamp))
+            else:
+                self.drone_raw_pos[i] = drone_raw_pos[i]
+
         drone_yaw_quat = quaternion_from_euler(0, 0, sp_raw.yaw)
         self.drone_raw_R = R.from_quat(drone_yaw_quat) 
 

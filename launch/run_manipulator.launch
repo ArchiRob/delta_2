@@ -12,6 +12,6 @@
     <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
   </group>
   <group unless="$(arg sim)">
-    <node name="ServoController" pkg="delta_2" type="servo_controller_simple.py" required="true" output="screen"/>
+    <node name="ServoController" pkg="delta_2" type="servo_controller.py" required="true" output="screen"/>
   </group>
 </launch>

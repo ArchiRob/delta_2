@@ -122,7 +122,6 @@ class InverseKinematics:
         t.transform.rotation.y = q[1]
         t.transform.rotation.z = q[2]
         t.transform.rotation.w = q[3]
-        self.br.sendTransform(t) 
 
         #initialise empty numpy arrays
         p_w = np.zeros((6,3))
@@ -188,6 +187,8 @@ class InverseKinematics:
                 servo_angles.Theta.append(np.rad2deg(self.Theta[i]))
 
             self.pub_servo_angles.publish(servo_angles)  
+
+            self.br.sendTransform(t) 
 
 if __name__ == '__main__': #initialise node and run loop
     rospy.init_node('inverse_kinematics')
