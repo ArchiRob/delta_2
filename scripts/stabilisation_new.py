@@ -52,6 +52,7 @@ class Stabilisation:
 
         self.V_sp_d = np.asarray([0,0,0])
         self.Omega_sp_d = np.asarray([0,0,0])
+        self.BP_b = self.home_pos
                
         rospy.spin()
 
