@@ -26,6 +26,16 @@ class Stabilisation:
         self.tfBuffer = tf2_ros.Buffer()
         tfListener = tf2_ros.TransformListener(self.tfBuffer)
 
+        # initial values of stuff
+        self.manip_mode = "RETRACTED"
+        self.home_pos = np.asarray([self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z])
+        self.retracted_pos = rospy.get_param('/retracted_position')
+        self.V_sp_d = np.asarray([0.0, 0.0, 0.0])
+        self.Omega_sp_d = np.asarray([0.0, 0.0, 0.0])
+        self.X_sp_w = np.asarray([0.0, 0.0, 0.0])
+        self.Q_sp_W = self.d_q_b
+        self.X = self.retracted_pos
+
         #obtain transforms and convert to numpy arrays for later
         d_tf_b = self.tfBuffer.lookup_transform('base_link', 'stewart_base', time=rospy.Time(0), timeout=rospy.Duration(10))
         self.DB_d = np.asarray([d_tf_b.transform.translation.x, d_tf_b.transform.translation.y, d_tf_b.transform.translation.z])
@@ -51,15 +61,7 @@ class Stabilisation:
         self.pub_platform_accel = rospy.Publisher('/platform_setpoint/accel', AccelStamped, queue_size=1, tcp_nodelay=True)
         sub_drone_accel = rospy.Subscriber('/mavros/imu/data', Imu, self.drone_accel_callback, tcp_nodelay=True)
         
-        # initial values of stuff
-        self.manip_mode = "RETRACTED"
-        self.home_pos = np.asarray([self.home_tf.transform.translation.x, self.home_tf.transform.translation.y, self.home_tf.transform.translation.z])
-        self.retracted_pos = rospy.get_param('/retracted_position')
-        self.V_sp_d = np.asarray([0.0, 0.0, 0.0])
-        self.Omega_sp_d = np.asarray([0.0, 0.0, 0.0])
-        self.X_sp_w = np.asarray([0.0, 0.0, 0.0])
-        self.Q_sp_W = self.d_q_b
-        self.X = self.retracted_pos
+        
 
         rospy.spin()
 
