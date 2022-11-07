@@ -8,6 +8,8 @@ A .sdf file is used to describe the robot due to the ability to handle closed ki
 
 The inverse kinematics equations are taken from https://www.cambridge.org/core/journals/robotica/article/kinematic-and-dynamic-analysis-of-stewart-platformbased-machine-tool-structures/44227E02990F830098CB3897F3AED707 and adapted to rotary joints.
 
+Gazebo models are available for a 6DOF stewart platform based manipulator and a regular 3DOF delta robot. Beware sending non-unit orientation quaternions to the delta robot will not show errors but will muck up the inverse kinematics.
+
 ## Setup instructions
 Clone this repo in your workspace and build:
 ```
@@ -28,13 +30,14 @@ cd build
 cmake ..
 make
 ```
-Install groundtruth plugin dependecy:
-```
-sudo apt install ros-noetic-gazebo-plugins
-```
+
 Then run the simulation:
 ```
-roslaunch delta_2 manipulator_sim.launch
+roslaunch delta_2 manipulator_sim.launch type:="stewart"
 ```
-Use `rqt` to send setpoints to the manipulator
+or
+```
+roslaunch delta_2 manipulator_sim.launch type:="delta"
+```
+Use dynamic reconfigure to send setpoints to the manipulator
 

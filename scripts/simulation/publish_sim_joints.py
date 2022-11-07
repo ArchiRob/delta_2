@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 import numpy as np
 from std_msgs.msg import Float32MultiArray, MultiArrayLayout
@@ -6,11 +6,11 @@ from delta_2.msg import ServoAnglesStamped
 
 class SimConverter:
     def __init__(self):
-        self.rate = 500
+        self.rate = rospy.get_param('/servo/rate')
 
-        self.pos_sp = np.zeros(6)
-        self.vel_sp = np.zeros(6)
-        self.acc_sp = np.zeros(6)
+        self.pos_sp = np.zeros(rospy.get_param('/servo/num'))
+        self.vel_sp = np.zeros(rospy.get_param('/servo/num'))
+        self.acc_sp = np.zeros(rospy.get_param('/servo/num'))
         self.stamp_latest = rospy.Time.now()
         self.vel_stamp_last = rospy.Time.now()
         self.acc_stamp_last = rospy.Time.now()

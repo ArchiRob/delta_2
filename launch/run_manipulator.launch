@@ -2,11 +2,31 @@
 <!-- Launch file for running the delta-arm only -->
 <launch>
   <arg name="sim" default="false"/>
+  <arg name="type" default="stewart"/>
 
-  <rosparam file="$(find delta_2)/cfg/geometry.yaml" />
   <rosparam file="$(find delta_2)/cfg/servo_settings.yaml" />
+  <rosparam param="/servo/num" if="$(eval type == 'delta')">3</rosparam>
+  <rosparam param="/servo/num" if="$(eval type == 'stewart')">6</rosparam>
 
-  <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+  <group if="$(eval type == 'delta')">  
+    <rosparam file="$(find delta_2)/cfg/delta_geometry.yaml" />
+    <group>
+    <remap from="/servo_setpoint/positions" to="/servo_setpoint/positions6dof"/>
+    <remap from="/servo_setpoint/velocities" to="/servo_setpoint/velocities6dof"/>
+    <remap from="/servo_setpoint/accels" to="/servo_setpoint/accels6dof"/>
+    <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+    </group>
+
+    <remap from="/servo_setpoint/positions3dof" to="/servo_setpoint/positions"/>
+    <remap from="/servo_setpoint/velocities3dof" to="/servo_setpoint/velocities"/>
+    <remap from="/servo_setpoint/accels3dof" to="/servo_setpoint/accels"/>
+    <node name="DeltaConverter" pkg="delta_2" type="delta_converter.py" required="true" output="screen"/>
+  </group>
+
+  <group if="$(eval type == 'stewart')">
+    <rosparam file="$(find delta_2)/cfg/stewart_geometry.yaml" />
+    <node name="InverseKinematics" pkg="delta_2" type="inverse_kinematics.py" required="true" output="screen"/>
+  </group>
 
   <group if="$(arg sim)">
     <node name="PublishSimJoints" pkg="delta_2" type="publish_sim_joints.py" required="true" output="screen"/>
